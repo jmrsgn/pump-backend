@@ -6,14 +6,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
-import com.johnmartin.pump.model.User;
+import com.johnmartin.pump.entities.User;
 
 @Repository
 public class UserRepository {
     private final Map<String, User> users = new HashMap<>();
 
-    public Optional<User> findByUsername(String username) {
-        return Optional.ofNullable(users.get(username));
+    public User findByUsername(String username) {
+        return users.get(username);
     }
 
     public void save(User user) {

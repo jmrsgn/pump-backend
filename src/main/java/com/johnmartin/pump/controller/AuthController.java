@@ -1,9 +1,5 @@
 package com.johnmartin.pump.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.johnmartin.pump.constants.ApiConstants;
 import com.johnmartin.pump.constants.ApiMessages;
-import com.johnmartin.pump.model.User;
+import com.johnmartin.pump.dto.request.LoginRequest;
+import com.johnmartin.pump.dto.request.RegisterRequest;
+import com.johnmartin.pump.dto.response.AuthResponse;
+import com.johnmartin.pump.dto.response.UserResponse;
+import com.johnmartin.pump.entities.User;
 import com.johnmartin.pump.repository.UserRepository;
 import com.johnmartin.pump.security.JwtUtil;
 
@@ -34,27 +34,52 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping(ApiConstants.Path.REGISTER)
-    public ResponseEntity<?> register(@RequestBody User user) {
-        if (StringUtils.isBlank(user.getEmail()) || StringUtils.isBlank(user.getPassword())) {
-            return ResponseEntity.badRequest().body(ApiMessages.User.EMAIL_AND_PASSWORD_ARE_REQUIRED);
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
+        AuthResponse authResponse = new AuthResponse();
+
+        if (StringUtils.isBlank(registerRequest.getEmail()) || StringUtils.isBlank(registerRequest.getPassword())) {
+            authResponse.setAuthMessage(ApiMessages.User.EMAIL_AND_PASSWORD_ARE_REQUIRED);
+            return ResponseEntity.badRequest().body(authResponse);
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        authResponse.setAuthMessage(ApiMessages.User.USER_REGISTERED_SUCCESSFULLY);
+
+        User user = new User();
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPhone(registerRequest.getPhone());
+        user.setRole(registerRequest.getRole());
+        user.setProfileImageUrl(registerRequest.getProfileImageUrl());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         userRepository.save(user);
-        return ResponseEntity.ok(ApiMessages.User.USER_REGISTERED_SUCCESSFULLY);
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping(ApiConstants.Path.LOGIN)
-    public ResponseEntity<?> login(@RequestBody User user) {
-        Optional<User> dbUser = userRepository.findByUsername(user.getUsername());
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
+        User dbUser = userRepository.findByUsername(loginRequest.getUsername());
+        AuthResponse authResponse = new AuthResponse();
 
-        if (dbUser.isPresent() && passwordEncoder.matches(user.getPassword(), dbUser.get().getPassword())) {
-            String token = jwtUtil.generateToken(dbUser.get().getEmail());
-            Map<String, String> response = new HashMap<>();
-            response.put("token", token);
-            return ResponseEntity.ok(response);
+        if (dbUser != null && passwordEncoder.matches(loginRequest.getPassword(), dbUser.getPassword())) {
+            String token = jwtUtil.generateToken(dbUser.getEmail());
+
+            UserResponse userResponse = new UserResponse(dbUser.getId(),
+                                                         dbUser.getFirstName(),
+                                                         dbUser.getLastName(),
+                                                         dbUser.getUsername(),
+                                                         dbUser.getEmail(),
+                                                         dbUser.getPhone(),
+                                                         dbUser.getRole(),
+                                                         dbUser.getProfileImageUrl());
+
+            authResponse.setToken(token);
+            authResponse.setUserResponse(userResponse);
+            return ResponseEntity.ok(authResponse);
         }
 
-        return ResponseEntity.status(ApiConstants.Status.UNAUTHORIZED).body(ApiMessages.User.INVALID_CREDENTIALS);
+        authResponse.setAuthMessage(ApiMessages.User.INVALID_CREDENTIALS);
+        return ResponseEntity.status(ApiConstants.Status.UNAUTHORIZED).body(authResponse);
     }
 }
