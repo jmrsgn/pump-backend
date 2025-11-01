@@ -3,7 +3,7 @@ package com.johnmartin.pump.dto.response;
 public class AuthResponse {
     private String token;
     private UserResponse userResponse;
-    private String authMessage;
+    private String errorMessage;
 
     public String getToken() {
         return token;
@@ -21,11 +21,11 @@ public class AuthResponse {
         this.userResponse = userResponse;
     }
 
-    public String getAuthMessage() {
-        return authMessage;
+    public String getErrorMessage() {
+        return errorMessage;
     }
 
-    public void setAuthMessage(String authMessage) {
-        this.authMessage = authMessage;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

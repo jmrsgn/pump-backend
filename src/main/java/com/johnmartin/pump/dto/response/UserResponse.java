@@ -4,24 +4,21 @@ public class UserResponse {
     private Long id;
     private String firstName;
     private String lastName;
-    private String username;
     private String email;
     private String phone;
-    private String role;
+    private Integer role;
     private String profileImageUrl;
 
     public UserResponse(Long id,
                         String firstName,
                         String lastName,
-                        String username,
                         String email,
                         String phone,
-                        String role,
+                        Integer role,
                         String profileImageUrl) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.username = username;
         this.email = email;
         this.phone = phone;
         this.role = role;
@@ -52,14 +49,6 @@ public class UserResponse {
         this.lastName = lastName;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -76,11 +65,11 @@ public class UserResponse {
         this.phone = phone;
     }
 
-    public String getRole() {
+    public Integer getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Integer role) {
         this.role = role;
     }
 

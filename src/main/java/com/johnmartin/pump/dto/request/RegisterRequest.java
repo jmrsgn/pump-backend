@@ -6,7 +6,7 @@ public class RegisterRequest {
     private String username;
     private String email;
     private String phone;
-    private String role;
+    private Integer role;
     private String profileImageUrl;
     private String password;
 
@@ -50,11 +50,11 @@ public class RegisterRequest {
         this.phone = phone;
     }
 
-    public String getRole() {
+    public Integer getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Integer role) {
         this.role = role;
     }
 
