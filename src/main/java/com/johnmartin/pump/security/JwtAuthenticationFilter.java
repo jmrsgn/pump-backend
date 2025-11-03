@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract the JWT token from the Authorization header and retrieve the username from it
         String token = StringUtils.substringAfter(header, "Bearer ");
-        String username = jwtUtil.extractUsername(token);
+        String username = jwtUtil.extractEmail(token);
 
         // Check that the username exists, and no authentication is currently set in the security context,
         // and the provided JWT token is valid

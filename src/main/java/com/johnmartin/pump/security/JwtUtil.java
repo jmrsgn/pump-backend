@@ -31,8 +31,8 @@ public class JwtUtil {
         this.expirationMillis = expirationMillis;
     }
 
-    public String generateToken(String username) {
-        if (StringUtils.isBlank(username)) {
+    public String generateToken(String email) {
+        if (StringUtils.isBlank(email)) {
             throw new IllegalArgumentException("Username cannot be blank when generating token");
         }
 
@@ -40,14 +40,14 @@ public class JwtUtil {
         Date expiryDate = new Date(now.getTime() + expirationMillis);
 
         return Jwts.builder()
-                   .setSubject(username)
+                   .setSubject(email)
                    .setIssuedAt(now)
                    .setExpiration(expiryDate)
                    .signWith(secretKey)
                    .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         if (StringUtils.isBlank(token)) {
             return null;
         }
