@@ -1,5 +1,7 @@
 package com.johnmartin.pump.entities;
 
+import java.util.UUID;
+
 import com.johnmartin.pump.constants.UserEntityConstants;
 
 import jakarta.persistence.*;
@@ -9,22 +11,28 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     private String firstName;
+
     private String lastName;
-    private String username;
+
+    @Column(unique = true)
     private String email;
+
     private String phone;
+
     private Integer role;
+
     private String profileImageUrl;
+
     private String password;
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -42,14 +50,6 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getEmail() {

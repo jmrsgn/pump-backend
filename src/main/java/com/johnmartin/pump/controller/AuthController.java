@@ -1,6 +1,7 @@
 package com.johnmartin.pump.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,14 +16,17 @@ import com.johnmartin.pump.dto.request.RegisterRequest;
 import com.johnmartin.pump.dto.response.AuthResponse;
 import com.johnmartin.pump.dto.response.UserResponse;
 import com.johnmartin.pump.entities.User;
+import com.johnmartin.pump.exception.UserNotFoundException;
 import com.johnmartin.pump.repository.UserRepository;
 import com.johnmartin.pump.security.JwtUtil;
+import com.johnmartin.pump.utilities.LoggerUtility;
 
 import io.micrometer.common.util.StringUtils;
 
 @RestController
 @RequestMapping(ApiConstants.Path.API_BASE)
 public class AuthController {
+    private static final String DEBUG_TAG = AuthController.class.getSimpleName();
 
     @Autowired
     private UserRepository userRepository;
@@ -42,6 +46,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(authResponse);
         }
 
+        // Create a User class and save to DB
         User user = new User();
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -52,8 +57,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
-        UserResponse userResponse = new UserResponse(null,
-                                                     user.getFirstName(),
+        UserResponse userResponse = new UserResponse(user.getFirstName(),
                                                      user.getLastName(),
                                                      user.getEmail(),
                                                      user.getPhone(),
@@ -69,23 +73,30 @@ public class AuthController {
         User dbUser = userRepository.findByEmail(request.getEmail());
         AuthResponse authResponse = new AuthResponse();
 
-        if (dbUser != null && passwordEncoder.matches(request.getPassword(), dbUser.getPassword())) {
-            String token = jwtUtil.generateToken(dbUser.getEmail());
+        if (dbUser == null) {
+            throw new UserNotFoundException("User with email " + request.getEmail() + " not found");
+        }
 
-            UserResponse userResponse = new UserResponse(dbUser.getId(),
-                                                         dbUser.getFirstName(),
-                                                         dbUser.getLastName(),
-                                                         dbUser.getEmail(),
-                                                         dbUser.getPhone(),
-                                                         dbUser.getRole(),
-                                                         dbUser.getProfileImageUrl());
+        try {
+            if (passwordEncoder.matches(request.getPassword(), dbUser.getPassword())) {
+                String token = jwtUtil.generateToken(dbUser.getEmail());
 
-            authResponse.setToken(token);
-            authResponse.setUserResponse(userResponse);
-            return ResponseEntity.ok(authResponse);
+                UserResponse userResponse = new UserResponse(dbUser.getFirstName(),
+                                                             dbUser.getLastName(),
+                                                             dbUser.getEmail(),
+                                                             dbUser.getPhone(),
+                                                             dbUser.getRole(),
+                                                             dbUser.getProfileImageUrl());
+
+                authResponse.setToken(token);
+                authResponse.setUserResponse(userResponse);
+                return ResponseEntity.ok(authResponse);
+            }
+        } catch (Exception e) {
+            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
         }
 
         authResponse.setErrorMessage(ApiMessages.User.INVALID_CREDENTIALS);
-        return ResponseEntity.status(ApiConstants.Status.UNAUTHORIZED).body(authResponse);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);
     }
 }

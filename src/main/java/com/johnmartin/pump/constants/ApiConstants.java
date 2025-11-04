@@ -15,11 +15,7 @@ public class ApiConstants {
         public static final String PROFILE = "/profile";
     }
 
-    public static class Status {
-        public static int UNAUTHORIZED = 401;
-    }
-
     public static class Params {
-        public static final String EMAIL = "/{email}";
+        public static final String ID = "/{id}";
     }
 }
