@@ -34,18 +34,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Extract the JWT token from the Authorization header and retrieve the username from it
+        // Extract the JWT token from the Authorization header and retrieve the email from it
         String token = StringUtils.substringAfter(header, "Bearer ");
-        String username = jwtUtil.extractEmail(token);
+        String email = jwtUtil.extractEmail(token);
 
         // Check that the username exists, and no authentication is currently set in the security context,
         // and the provided JWT token is valid
-        if (StringUtils.isNotBlank(username) && SecurityContextHolder.getContext().getAuthentication() == null
+        if (StringUtils.isNotBlank(email) && SecurityContextHolder.getContext().getAuthentication() == null
             && jwtUtil.validateToken(token)) {
 
             // Create an authentication token using the extracted username and no credentials or authorities
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username,
-                                                                                                    null, // Already provided JWT
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email,
+                                                                                                    null, // Already
+                                                                                                          // provided
+                                                                                                          // JWT
                                                                                                     Collections.emptyList());
 
             // Attach request details (like remote address and session ID) to the authentication token

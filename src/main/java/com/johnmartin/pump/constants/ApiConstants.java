@@ -13,6 +13,9 @@ public class ApiConstants {
         // User
         public static final String API_USER = "/api/v1/user";
         public static final String PROFILE = "/profile";
+
+        // Post
+        public static final String API_POST = "/api/v1/post";
     }
 
     public static class Params {

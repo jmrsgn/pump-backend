@@ -2,37 +2,28 @@ package com.johnmartin.pump.entities;
 
 import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.johnmartin.pump.constants.UserEntityConstants;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = UserEntityConstants.TABLE_NAME)
-public class User {
+@Document(collection = UserEntityConstants.TABLE_NAME)
+public class UserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
-
+    private String id = UUID.randomUUID().toString();
     private String firstName;
-
     private String lastName;
-
-    @Column(unique = true)
     private String email;
-
     private String phone;
-
     private Integer role;
-
     private String profileImageUrl;
-
     private String password;
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 
