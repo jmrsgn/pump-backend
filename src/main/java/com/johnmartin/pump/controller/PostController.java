@@ -1,9 +1,11 @@
 package com.johnmartin.pump.controller;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,56 +13,95 @@ import org.springframework.web.bind.annotation.*;
 
 import com.johnmartin.pump.constants.ApiConstants;
 import com.johnmartin.pump.constants.ApiErrorMessages;
-import com.johnmartin.pump.dto.response.ApiErrorResponse;
+import com.johnmartin.pump.dto.request.CreatePostRequest;
+import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.entities.PostEntity;
+import com.johnmartin.pump.entities.UserEntity;
+import com.johnmartin.pump.exception.UserNotFoundException;
 import com.johnmartin.pump.service.PostService;
+import com.johnmartin.pump.service.UserService;
+import com.johnmartin.pump.utilities.LoggerUtility;
+import com.johnmartin.pump.utils.ApiErrorUtils;
 
 @RestController
 @RequestMapping(ApiConstants.Path.API_POST)
 public class PostController {
 
-    private final PostService postService;
+    private static final String DEBUG_TAG = PostController.class.getSimpleName();
 
     @Autowired
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
+    private PostService postService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
-    public ResponseEntity<Result<List<PostEntity>>> getAllPosts() {
+    public ResponseEntity<Result<List<PostResponse>>> getAllPosts() {
         try {
             List<PostEntity> posts = Optional.ofNullable(postService.getAllPosts()).orElse(Collections.emptyList());
 
-            if (posts.isEmpty()) {
-                Result<List<PostEntity>> result = Result.failure(new ApiErrorResponse(HttpStatus.NOT_FOUND.value(),
-                                                                                      ApiErrorMessages.Post.NO_POSTS_FOUND,
-                                                                                      ApiErrorMessages.Post.THERE_ARE_NO_POST_AVAILABLE));
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+            if (CollectionUtils.isEmpty(posts)) {
+                return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.Post.THERE_ARE_NO_POST_AVAILABLE);
             }
 
-            Result<List<PostEntity>> result = Result.success(posts);
-            return ResponseEntity.ok(result);
+            List<PostResponse> postResponseList = new ArrayList<>();
+            CollectionUtils.collect(posts,
+                                    post -> new PostResponse(post.getId(),
+                                                             post.getTitle(),
+                                                             post.getDescription(),
+                                                             post.getUserId(),
+                                                             post.getUserName(),
+                                                             post.getUserProfileImageUrl(),
+                                                             post.getCreatedAt(),
+                                                             post.getUpdatedAt(),
+                                                             post.getLikesCount(),
+                                                             post.getComments(),
+                                                             post.getCommentsCount()),
+                                    postResponseList);
+
+            return ResponseEntity.ok(Result.success(postResponseList));
         } catch (Exception e) {
-            Result<List<PostEntity>> result = Result.failure(new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                                                                  ApiErrorMessages.INTERNAL_SERVER_ERROR,
-                                                                                  e.getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping
-    public ResponseEntity<Result<PostEntity>> createPost(@RequestBody PostEntity post) {
+    public ResponseEntity<Result<PostResponse>> createPost(@RequestBody CreatePostRequest request) {
+        Optional<UserEntity> dbUserEntity = userService.findById(request.getUserId());
+        if (dbUserEntity.isEmpty()) {
+            throw new UserNotFoundException(ApiErrorMessages.User.USER_NOT_FOUND);
+        }
+
         try {
-            // Save the post
-            PostEntity createdPost = postService.createPost(post);
-            Result<PostEntity> result = Result.success(createdPost);
-            return ResponseEntity.status(HttpStatus.CREATED).body(result);
+            PostEntity createdPost = new PostEntity();
+            createdPost.setTitle(request.getTitle());
+            createdPost.setDescription(request.getDescription());
+            createdPost.setUserId(request.getUserId());
+            createdPost.setUserName(dbUserEntity.get().getFirstName() + " " + dbUserEntity.get().getLastName());
+            createdPost.setUserProfileImageUrl(dbUserEntity.get().getProfileImageUrl());
+            createdPost.setLikesCount(0);
+            createdPost.setComments(new ArrayList<>());
+            createdPost.setCommentsCount(0);
+
+            // ID and Dates are generated by MongoDB after insertion
+            PostEntity postToBeReturned = postService.savePost(createdPost);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                                 .body(Result.success(new PostResponse(postToBeReturned.getId(),
+                                                                       postToBeReturned.getTitle(),
+                                                                       postToBeReturned.getDescription(),
+                                                                       postToBeReturned.getUserId(),
+                                                                       postToBeReturned.getUserName(),
+                                                                       postToBeReturned.getUserProfileImageUrl(),
+                                                                       postToBeReturned.getCreatedAt(),
+                                                                       postToBeReturned.getUpdatedAt(),
+                                                                       postToBeReturned.getLikesCount(),
+                                                                       postToBeReturned.getComments(),
+                                                                       postToBeReturned.getCommentsCount())));
         } catch (Exception e) {
-            Result<PostEntity> result = Result.failure(new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                                                            ApiErrorMessages.INTERNAL_SERVER_ERROR,
-                                                                            e.getMessage()));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
     }
 }

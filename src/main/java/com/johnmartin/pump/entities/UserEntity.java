@@ -1,7 +1,5 @@
 package com.johnmartin.pump.entities;
 
-import java.util.UUID;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,7 +8,7 @@ import com.johnmartin.pump.constants.UserEntityConstants;
 @Document(collection = UserEntityConstants.TABLE_NAME)
 public class UserEntity {
     @Id
-    private String id = UUID.randomUUID().toString();
+    private String id;
     private String firstName;
     private String lastName;
     private String email;

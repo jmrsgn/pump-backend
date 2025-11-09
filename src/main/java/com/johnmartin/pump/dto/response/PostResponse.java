@@ -1,17 +1,11 @@
-package com.johnmartin.pump.entities;
+package com.johnmartin.pump.dto.response;
 
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.mongodb.core.mapping.Document;
+import com.johnmartin.pump.entities.PostEntity;
 
-@Document(collection = "posts")
-public class PostEntity {
-
-    @Id
+public class PostResponse {
     private String id;
     private String title;
     private String description;
@@ -22,14 +16,36 @@ public class PostEntity {
     private String userName;
     private String userProfileImageUrl;
 
-    @CreatedDate
     private Instant createdAt;
-    @LastModifiedDate
     private Instant updatedAt;
 
     private int likesCount;
-    private List<Comment> comments;
+    private List<PostEntity.Comment> comments;
     private int commentsCount;
+
+    public PostResponse(String id,
+                        String title,
+                        String description,
+                        String userId,
+                        String userName,
+                        String userProfileImageUrl,
+                        Instant createdAt,
+                        Instant updatedAt,
+                        int likesCount,
+                        List<PostEntity.Comment> comments,
+                        int commentsCount) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.userId = userId;
+        this.userName = userName;
+        this.userProfileImageUrl = userProfileImageUrl;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.likesCount = likesCount;
+        this.comments = comments;
+        this.commentsCount = commentsCount;
+    }
 
     public String getId() {
         return id;
@@ -103,11 +119,11 @@ public class PostEntity {
         this.likesCount = likesCount;
     }
 
-    public List<Comment> getComments() {
+    public List<PostEntity.Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(List<PostEntity.Comment> comments) {
         this.comments = comments;
     }
 
@@ -119,13 +135,13 @@ public class PostEntity {
         this.commentsCount = commentsCount;
     }
 
-    public static class Comment {
+    public static class CommentResponse {
         private String userName;
         private String userProfileImageUrl;
         private String comment;
         private int likesCount;
 
-        public Comment() {
+        public CommentResponse() {
         }
 
         public String getUserName() {

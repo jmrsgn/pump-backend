@@ -41,4 +41,8 @@ public class Result<T> {
     public Optional<T> getData() {
         return Optional.ofNullable(data);
     }
+
+    public ApiErrorResponse getError() {
+        return apiErrorResponse;
+    }
 }

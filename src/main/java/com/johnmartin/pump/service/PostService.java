@@ -23,7 +23,7 @@ public class PostService {
         return postRepository.findAll().stream().filter(post -> post.getUserId().equals(userId)).toList();
     }
 
-    public PostEntity createPost(PostEntity post) {
+    public PostEntity savePost(PostEntity post) {
         return postRepository.save(post);
     }
 

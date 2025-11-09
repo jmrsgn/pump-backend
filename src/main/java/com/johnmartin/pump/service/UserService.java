@@ -1,5 +1,7 @@
 package com.johnmartin.pump.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,15 @@ public class UserService {
         userRepository.save(userEntity);
     }
 
-    public UserEntity findByEmail(String email) {
+    public Optional<UserEntity> findById(String id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public UserEntity createUser(UserEntity userEntity) {
+        return userRepository.save(userEntity);
     }
 }
