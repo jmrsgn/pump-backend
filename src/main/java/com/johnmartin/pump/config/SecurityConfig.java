@@ -26,7 +26,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             // Authorization rules
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.API_BASE + "/**")
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.API_AUTH + "/**")
                                                          .permitAll()
                                                          .anyRequest()
                                                          .authenticated())

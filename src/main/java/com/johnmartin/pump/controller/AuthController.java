@@ -1,6 +1,5 @@
 package com.johnmartin.pump.controller;
 
-import com.johnmartin.pump.entities.UserEntity;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +16,7 @@ import com.johnmartin.pump.dto.request.LoginRequest;
 import com.johnmartin.pump.dto.request.RegisterRequest;
 import com.johnmartin.pump.dto.response.AuthResponse;
 import com.johnmartin.pump.dto.response.UserResponse;
+import com.johnmartin.pump.entities.UserEntity;
 import com.johnmartin.pump.exception.UserNotFoundException;
 import com.johnmartin.pump.security.JwtUtil;
 import com.johnmartin.pump.service.UserService;
@@ -25,7 +25,7 @@ import com.johnmartin.pump.utilities.LoggerUtility;
 import io.micrometer.common.util.StringUtils;
 
 @RestController
-@RequestMapping(ApiConstants.Path.API_BASE)
+@RequestMapping(ApiConstants.Path.API_AUTH)
 public class AuthController {
     private static final String DEBUG_TAG = AuthController.class.getSimpleName();
 
