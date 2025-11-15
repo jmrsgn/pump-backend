@@ -1,9 +1,6 @@
 package com.johnmartin.pump.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +57,12 @@ public class PostController {
                                                              post.getCommentsCount()),
                                     postResponseList);
 
+            // Sort from newest to oldest
+            postResponseList.sort(Comparator.comparing(PostResponse::getCreatedAt).reversed());
+            LoggerUtility.v(DEBUG_TAG, String.format("Sorted posts: [%s]", postResponseList));
             return ResponseEntity.ok(Result.success(postResponseList));
         } catch (Exception e) {
-            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
     }
@@ -100,7 +100,7 @@ public class PostController {
                                                                        postToBeReturned.getComments(),
                                                                        postToBeReturned.getCommentsCount())));
         } catch (Exception e) {
-            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
     }

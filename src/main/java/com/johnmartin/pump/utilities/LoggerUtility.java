@@ -12,19 +12,23 @@ public class LoggerUtility {
         return LoggerFactory.getLogger(tag);
     }
 
-    public static void info(String tag, String message, Object... args) {
+    public static void i(String tag, String message, Object... args) {
         getLogger(tag).info(message, args);
     }
 
-    public static void debug(String tag, String message, Object... args) {
+    public static void d(String tag, String message, Object... args) {
         getLogger(tag).debug(message, args);
     }
 
-    public static void warn(String tag, String message, Object... args) {
+    public static void w(String tag, String message, Object... args) {
         getLogger(tag).warn(message, args);
     }
 
-    public static void error(String tag, String message, Throwable throwable) {
+    public static void e(String tag, String message, Throwable throwable) {
         getLogger(tag).error(message, throwable);
+    }
+
+    public static void v(String tag, String message) {
+        getLogger(tag).trace(message);
     }
 }

@@ -175,5 +175,19 @@ public class PostResponse {
         public void setLikesCount(int likesCount) {
             this.likesCount = likesCount;
         }
+
+        @Override
+        public String toString() {
+            return "CommentResponse{" + "userName='" + userName + '\'' + ", userProfileImageUrl='" + userProfileImageUrl
+                   + '\'' + ", comment='" + comment + '\'' + ", likesCount=" + likesCount + '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "PostResponse{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description
+               + '\'' + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
+               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
+               + likesCount + ", comments=" + comments + ", commentsCount=" + commentsCount + '}';
     }
 }

@@ -79,7 +79,7 @@ public class AuthController {
                                                           createdUser.getProfileImageUrl()));
             return ResponseEntity.ok(Result.success(authResponse));
         } catch (Exception e) {
-            LoggerUtility.error(DEBUG_TAG, ApiErrorMessages.User.USER_REGISTRATION_FAILED + " e: " + e.getMessage(), e);
+            LoggerUtility.e(DEBUG_TAG, ApiErrorMessages.User.USER_REGISTRATION_FAILED + " e: " + e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.User.USER_REGISTRATION_FAILED);
         }
     }
@@ -113,10 +113,10 @@ public class AuthController {
                 return ResponseEntity.ok(Result.success(authResponse));
             }
         } catch (UserNotFoundException e) {
-            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.User.USER_NOT_FOUND);
         } catch (Exception e) {
-            LoggerUtility.error(DEBUG_TAG, e.getMessage(), e);
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.LOGIN_FAILED_PLEASE_TRY_AGAIN_LATER);
         }
 
