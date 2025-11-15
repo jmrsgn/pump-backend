@@ -20,7 +20,6 @@ import com.johnmartin.pump.dto.response.AuthResponse;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.dto.response.UserResponse;
 import com.johnmartin.pump.entities.UserEntity;
-import com.johnmartin.pump.exception.UserNotFoundException;
 import com.johnmartin.pump.security.JwtUtil;
 import com.johnmartin.pump.service.UserService;
 import com.johnmartin.pump.utilities.LoggerUtility;
@@ -88,38 +87,37 @@ public class AuthController {
     public ResponseEntity<Result<AuthResponse>> login(@RequestBody LoginRequest request) {
         Optional<UserEntity> userOpt = userService.findByEmail(request.getEmail());
         if (userOpt.isEmpty()) {
-            throw new UserNotFoundException(String.format(ApiErrorMessages.User.USER_WITH_EMAIL_NOT_FOUND,
-                                                          request.getEmail()));
+            return ApiErrorUtils.createNotFoundErrorResponse(String.format(ApiErrorMessages.User.USER_WITH_EMAIL_NOT_FOUND,
+                                                                           request.getEmail()));
         }
 
         UserEntity dbUser = userOpt.get();
-        ApiErrorResponse apiErrorResponse = new ApiErrorResponse();
 
         try {
-            if (passwordEncoder.matches(request.getPassword(), dbUser.getPassword())) {
-                String token = jwtUtil.generateToken(dbUser.getEmail());
-
-                UserResponse userResponse = new UserResponse(dbUser.getId(),
-                                                             dbUser.getFirstName(),
-                                                             dbUser.getLastName(),
-                                                             dbUser.getEmail(),
-                                                             dbUser.getPhone(),
-                                                             dbUser.getRole(),
-                                                             dbUser.getProfileImageUrl());
-
-                AuthResponse authResponse = new AuthResponse();
-                authResponse.setToken(token);
-                authResponse.setUserResponse(userResponse);
-                return ResponseEntity.ok(Result.success(authResponse));
+            if (!passwordEncoder.matches(request.getPassword(), dbUser.getPassword())) {
+                return ApiErrorUtils.createUnauthorizedErrorResponse(ApiErrorMessages.User.INVALID_CREDENTIALS);
             }
-        } catch (UserNotFoundException e) {
-            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
-            return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.User.USER_NOT_FOUND);
+
+            String token = jwtUtil.generateToken(dbUser.getEmail());
+
+            UserResponse userResponse = new UserResponse(dbUser.getId(),
+                                                         dbUser.getFirstName(),
+                                                         dbUser.getLastName(),
+                                                         dbUser.getEmail(),
+                                                         dbUser.getPhone(),
+                                                         dbUser.getRole(),
+                                                         dbUser.getProfileImageUrl());
+
+            AuthResponse authResponse = new AuthResponse();
+            authResponse.setToken(token);
+            authResponse.setUserResponse(userResponse);
+
+            return ResponseEntity.ok(Result.success(authResponse));
+
         } catch (Exception e) {
             LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.LOGIN_FAILED_PLEASE_TRY_AGAIN_LATER);
         }
-
-        return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
     }
+
 }
