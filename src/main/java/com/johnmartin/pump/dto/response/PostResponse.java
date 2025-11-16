@@ -3,8 +3,6 @@ package com.johnmartin.pump.dto.response;
 import java.time.Instant;
 import java.util.List;
 
-import com.johnmartin.pump.entities.PostEntity;
-
 public class PostResponse {
     private String id;
     private String title;
@@ -19,9 +17,11 @@ public class PostResponse {
     private Instant createdAt;
     private Instant updatedAt;
 
+    private List<CommentResponse> comments;
+
     private int likesCount;
-    private List<PostEntity.Comment> comments;
     private int commentsCount;
+    private int sharesCount;
 
     public PostResponse(String id,
                         String title,
@@ -31,9 +31,10 @@ public class PostResponse {
                         String userProfileImageUrl,
                         Instant createdAt,
                         Instant updatedAt,
+                        List<CommentResponse> comments,
                         int likesCount,
-                        List<PostEntity.Comment> comments,
-                        int commentsCount) {
+                        int commentsCount,
+                        int sharesCount) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -42,9 +43,10 @@ public class PostResponse {
         this.userProfileImageUrl = userProfileImageUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.likesCount = likesCount;
         this.comments = comments;
+        this.likesCount = likesCount;
         this.commentsCount = commentsCount;
+        this.sharesCount = sharesCount;
     }
 
     public String getId() {
@@ -111,20 +113,20 @@ public class PostResponse {
         this.updatedAt = updatedAt;
     }
 
+    public List<CommentResponse> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentResponse> comments) {
+        this.comments = comments;
+    }
+
     public int getLikesCount() {
         return likesCount;
     }
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
-    }
-
-    public List<PostEntity.Comment> getComments() {
-        return comments;
-    }
-
-    public void setComments(List<PostEntity.Comment> comments) {
-        this.comments = comments;
     }
 
     public int getCommentsCount() {
@@ -135,59 +137,20 @@ public class PostResponse {
         this.commentsCount = commentsCount;
     }
 
-    public static class CommentResponse {
-        private String userName;
-        private String userProfileImageUrl;
-        private String comment;
-        private int likesCount;
+    public int getSharesCount() {
+        return sharesCount;
+    }
 
-        public CommentResponse() {
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public String getUserProfileImageUrl() {
-            return userProfileImageUrl;
-        }
-
-        public void setUserProfileImageUrl(String userProfileImageUrl) {
-            this.userProfileImageUrl = userProfileImageUrl;
-        }
-
-        public String getComment() {
-            return comment;
-        }
-
-        public void setComment(String comment) {
-            this.comment = comment;
-        }
-
-        public int getLikesCount() {
-            return likesCount;
-        }
-
-        public void setLikesCount(int likesCount) {
-            this.likesCount = likesCount;
-        }
-
-        @Override
-        public String toString() {
-            return "CommentResponse{" + "userName='" + userName + '\'' + ", userProfileImageUrl='" + userProfileImageUrl
-                   + '\'' + ", comment='" + comment + '\'' + ", likesCount=" + likesCount + '}';
-        }
+    public void setSharesCount(int sharesCount) {
+        this.sharesCount = sharesCount;
     }
 
     @Override
     public String toString() {
         return "PostResponse{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description
                + '\'' + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
-               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
-               + likesCount + ", comments=" + comments + ", commentsCount=" + commentsCount + '}';
+               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", comments="
+               + comments + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount="
+               + sharesCount + '}';
     }
 }

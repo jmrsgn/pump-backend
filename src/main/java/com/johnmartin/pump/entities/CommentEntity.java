@@ -7,17 +7,17 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.johnmartin.pump.constants.PostEntityConstants;
+import com.johnmartin.pump.constants.CommentEntityConstants;
 
-@Document(collection = PostEntityConstants.TABLE_NAME)
-public class PostEntity {
+@Document(collection = CommentEntityConstants.TABLE_NAME)
+public class CommentEntity {
 
     @Id
     private String id;
-    private String title;
-    private String description;
+    private String comment;
 
     private String userId;
+    private String postId;
 
     // Store user basic info for faster frontend rendering
     private String userName;
@@ -29,8 +29,7 @@ public class PostEntity {
     private Instant updatedAt;
 
     private int likesCount;
-    private int commentsCount;
-    private int sharesCount;
+    private int repliesCount;
 
     public String getId() {
         return id;
@@ -40,20 +39,12 @@ public class PostEntity {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getComment() {
+        return comment;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public String getUserId() {
@@ -62,6 +53,14 @@ public class PostEntity {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public void setPostId(String postId) {
+        this.postId = postId;
     }
 
     public String getUserName() {
@@ -104,19 +103,11 @@ public class PostEntity {
         this.likesCount = likesCount;
     }
 
-    public int getCommentsCount() {
-        return commentsCount;
+    public int getRepliesCount() {
+        return repliesCount;
     }
 
-    public void setCommentsCount(int commentsCount) {
-        this.commentsCount = commentsCount;
-    }
-
-    public int getSharesCount() {
-        return sharesCount;
-    }
-
-    public void setSharesCount(int sharesCount) {
-        this.sharesCount = sharesCount;
+    public void setRepliesCount(int repliesCount) {
+        this.repliesCount = repliesCount;
     }
 }

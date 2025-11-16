@@ -15,12 +15,16 @@ import com.johnmartin.pump.constants.ApiErrorMessages;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.dto.response.UserResponse;
 import com.johnmartin.pump.entities.UserEntity;
+import com.johnmartin.pump.mapper.UserMapper;
 import com.johnmartin.pump.service.UserService;
+import com.johnmartin.pump.utilities.LoggerUtility;
 import com.johnmartin.pump.utils.ApiErrorUtils;
 
 @RestController
 @RequestMapping(ApiConstants.Path.API_USER)
 public class UserController {
+
+    private static final String DEBUG_TAG = UserController.class.getSimpleName();
 
     @Autowired
     private UserService userService;
@@ -42,14 +46,7 @@ public class UserController {
         }
 
         UserEntity userEntity = userOpt.get();
-        UserResponse userResponse = new UserResponse(userEntity.getId(),
-                                                     userEntity.getFirstName(),
-                                                     userEntity.getLastName(),
-                                                     userEntity.getEmail(),
-                                                     userEntity.getPhone(),
-                                                     userEntity.getRole(),
-                                                     userEntity.getProfileImageUrl());
-
-        return ResponseEntity.ok(Result.success(userResponse));
+        LoggerUtility.v(DEBUG_TAG, String.format("userEntity: [%s]", userEntity));
+        return ResponseEntity.ok(Result.success(UserMapper.toResponse(userEntity)));
     }
 }

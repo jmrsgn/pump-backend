@@ -1,17 +1,12 @@
 package com.johnmartin.pump.dto.request;
 
-import java.time.Instant;
-
 public class CreatePostRequest {
 
     private String title;
     private String description;
     private String userId;
 
-    public CreatePostRequest() {
-    }
-
-    public CreatePostRequest(String title, String description, String userId, Instant createdAt, Instant updatedAt) {
+    public CreatePostRequest(String title, String description, String userId) {
         this.title = title;
         this.description = description;
         this.userId = userId;
