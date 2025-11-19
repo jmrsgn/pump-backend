@@ -53,15 +53,17 @@ public class PostController {
             for (PostEntity post : posts) {
                 // Get comments from post
                 List<CommentEntity> commentEntityList = commentService.getAllCommentsFromPost(post.getId());
-                List<CommentResponse> commentResponseList = commentEntityList.stream()
-                                                                             .map(CommentMapper::toResponse)
-                                                                             .toList();
+                List<CommentResponse> commentResponseList = new ArrayList<>(commentEntityList.stream()
+                                                                                             .map(CommentMapper::toResponse)
+                                                                                             .toList());
 
+                // Sort comments from newest to oldest
+                commentResponseList.sort(Comparator.comparing(CommentResponse::getCreatedAt).reversed());
                 PostResponse postResponse = PostMapper.toResponse(post, commentResponseList);
                 postResponseList.add(postResponse);
             }
 
-            // Sort from newest to oldest
+            // Sort posts from newest to oldest
             postResponseList.sort(Comparator.comparing(PostResponse::getCreatedAt).reversed());
             LoggerUtility.v(DEBUG_TAG, String.format("Sorted postResponseList: [%s]", postResponseList));
             return ResponseEntity.ok(Result.success(postResponseList));
