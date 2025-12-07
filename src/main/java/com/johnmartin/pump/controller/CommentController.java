@@ -1,7 +1,8 @@
 package com.johnmartin.pump.controller;
 
-import java.util.Optional;
+import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class CommentController {
     private PostService postService;
 
     @PostMapping
-    public ResponseEntity<Result<CommentResponse>> createComment(@PathVariable(CommentEntityConstants.COLUMN_POST_ID) String postId,
+    public ResponseEntity<Result<CommentResponse>> createComment(@PathVariable(ApiConstants.Params.POST_ID) String postId,
                                                                  @RequestBody CreateCommentRequest request) {
         Optional<UserEntity> dbUserEntity = userService.findById(request.getUserId());
         if (dbUserEntity.isEmpty()) {
@@ -63,6 +64,30 @@ public class CommentController {
 
             return ResponseEntity.status(HttpStatus.CREATED)
                                  .body(Result.success(CommentMapper.toResponse(commentToBeReturned)));
+        } catch (Exception e) {
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
+            return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<Result<List<CommentResponse>>> getComments(@PathVariable(CommentEntityConstants.COLUMN_POST_ID) String postId) {
+        try {
+            List<CommentEntity> comments = Optional.ofNullable(commentService.getCommentsFromPost(postId))
+                                                   .orElse(Collections.emptyList());
+
+            if (CollectionUtils.isEmpty(comments)) {
+                return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.Post.THERE_ARE_NO_COMMENTS_AVAILABLE);
+            }
+
+            List<CommentResponse> commentResponseList = new ArrayList<>(comments.stream()
+                                                                                .map(CommentMapper::toResponse)
+                                                                                .toList());
+
+            // Sort comments from oldest to newest
+            commentResponseList.sort(Comparator.comparing(CommentResponse::getCreatedAt));
+            LoggerUtility.v(DEBUG_TAG, String.format("Sorted commentResponseList: [%s]", commentResponseList));
+            return ResponseEntity.ok(Result.success(commentResponseList));
         } catch (Exception e) {
             LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);

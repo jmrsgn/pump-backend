@@ -24,6 +24,8 @@ public class ApiErrorMessages {
     public static class Post {
         public static final String NO_POSTS_FOUND = "No posts found";
         public static final String THERE_ARE_NO_POST_AVAILABLE = "There are no posts available.";
+        public static final String THERE_ARE_NO_COMMENTS_AVAILABLE = "There are no comments available.";
+        public static final String POST_NOT_FOUND = "Post not found";
     }
 
 }

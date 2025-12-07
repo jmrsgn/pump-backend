@@ -1,6 +1,8 @@
 package com.johnmartin.pump.entities;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -31,6 +33,8 @@ public class PostEntity {
     private int likesCount;
     private int commentsCount;
     private int sharesCount;
+
+    private Set<String> likedUserIds = new HashSet<>();
 
     public String getId() {
         return id;
@@ -118,5 +122,13 @@ public class PostEntity {
 
     public void setSharesCount(int sharesCount) {
         this.sharesCount = sharesCount;
+    }
+
+    public Set<String> getLikedUserIds() {
+        return likedUserIds;
+    }
+
+    public void setLikedUserIds(Set<String> likedUserIds) {
+        this.likedUserIds = likedUserIds;
     }
 }

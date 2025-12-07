@@ -41,9 +41,9 @@ public class PostController {
     private CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<Result<List<PostResponse>>> getAllPosts() {
+    public ResponseEntity<Result<List<PostResponse>>> getPosts() {
         try {
-            List<PostEntity> posts = Optional.ofNullable(postService.getAllPosts()).orElse(Collections.emptyList());
+            List<PostEntity> posts = Optional.ofNullable(postService.getPosts()).orElse(Collections.emptyList());
 
             if (CollectionUtils.isEmpty(posts)) {
                 return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.Post.THERE_ARE_NO_POST_AVAILABLE);
@@ -52,13 +52,13 @@ public class PostController {
             List<PostResponse> postResponseList = new ArrayList<>();
             for (PostEntity post : posts) {
                 // Get comments from post
-                List<CommentEntity> commentEntityList = commentService.getAllCommentsFromPost(post.getId());
+                List<CommentEntity> commentEntityList = commentService.getCommentsFromPost(post.getId());
                 List<CommentResponse> commentResponseList = new ArrayList<>(commentEntityList.stream()
                                                                                              .map(CommentMapper::toResponse)
                                                                                              .toList());
 
-                // Sort comments from newest to oldest
-                commentResponseList.sort(Comparator.comparing(CommentResponse::getCreatedAt).reversed());
+                // Sort comments from oldest to newest
+                commentResponseList.sort(Comparator.comparing(CommentResponse::getCreatedAt));
                 PostResponse postResponse = PostMapper.toResponse(post, commentResponseList);
                 postResponseList.add(postResponse);
             }
@@ -100,5 +100,39 @@ public class PostController {
             LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping(ApiConstants.Path.POST_LIKE)
+    public ResponseEntity<Result<PostResponse>> likePost(@PathVariable(ApiConstants.Params.POST_ID) String postId) {
+        Optional<UserEntity> userOpt = userService.getAuthenticatedUser();
+        if (userOpt.isEmpty()) {
+            return ApiErrorUtils.createUnauthorizedErrorResponse(ApiErrorMessages.User.USER_IS_NOT_AUTHENTICATED);
+        }
+
+        try {
+            // Get post info
+            PostEntity post = postService.getPostById(postId);
+            if (post == null) {
+                return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.Post.POST_NOT_FOUND);
+            } else {
+                // Prevent double-like
+                if (!CollectionUtils.containsAny(post.getLikedUserIds(), userOpt.get().getId())) {
+                    postService.likePost(postId, userOpt.get().getId());
+
+                    List<CommentEntity> commentEntityList = commentService.getCommentsFromPost(post.getId());
+                    List<CommentResponse> commentResponseList = new ArrayList<>(commentEntityList.stream()
+                                                                                                 .map(CommentMapper::toResponse)
+                                                                                                 .toList());
+                    PostResponse updatedPost = PostMapper.toResponse(postService.getPostById(postId),
+                                                                     commentResponseList);
+                    return ResponseEntity.ok(Result.success(updatedPost));
+                }
+            }
+        } catch (Exception e) {
+            LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
+            return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
+        }
+
+        return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
     }
 }

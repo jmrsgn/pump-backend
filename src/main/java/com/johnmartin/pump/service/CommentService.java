@@ -18,7 +18,7 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public List<CommentEntity> getAllCommentsFromPost(String postId) {
+    public List<CommentEntity> getCommentsFromPost(String postId) {
         return commentRepository.findByPostIdOrderByCreatedAtDesc(postId);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import com.johnmartin.pump.constants.CommentEntityConstants;
+import com.johnmartin.pump.constants.PostEntityConstants;
 import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.repository.PostRepository;
 
@@ -23,11 +24,11 @@ public class PostService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<PostEntity> getAllPosts() {
+    public List<PostEntity> getPosts() {
         return postRepository.findAll();
     }
 
-    public List<PostEntity> getAllPostsFromUser(UUID userId) {
+    public List<PostEntity> getPostsFromUser(UUID userId) {
         return postRepository.findAll().stream().filter(post -> post.getUserId().equals(userId.toString())).toList();
     }
 
@@ -37,6 +38,13 @@ public class PostService {
 
     public PostEntity getPostById(String postId) {
         return postRepository.findById(postId).orElse(null);
+    }
+
+    public void likePost(String postId, String userId) {
+        Update update = new Update().addToSet(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, 1);
+
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
     }
 
     public void incrementCommentsCount(String postId) {

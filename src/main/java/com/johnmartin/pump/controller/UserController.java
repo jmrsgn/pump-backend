@@ -4,8 +4,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,18 +27,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Utility method to fetch currently authenticated user
-    private Optional<UserEntity> getAuthenticatedUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return Optional.empty();
-        }
-        return userService.findByEmail(auth.getName());
-    }
-
     @GetMapping(ApiConstants.Path.PROFILE)
     public ResponseEntity<Result<UserResponse>> getCurrentUser() {
-        Optional<UserEntity> userOpt = getAuthenticatedUser();
+        Optional<UserEntity> userOpt = userService.getAuthenticatedUser();
         if (userOpt.isEmpty()) {
             return ApiErrorUtils.createUnauthorizedErrorResponse(ApiErrorMessages.User.USER_IS_NOT_AUTHENTICATED);
         }

@@ -19,6 +19,7 @@ public class PostMapper {
                                 comments,
                                 postEntity.getLikesCount(),
                                 postEntity.getCommentsCount(),
-                                postEntity.getSharesCount());
+                                postEntity.getSharesCount(),
+                                postEntity.getLikedUserIds());
     }
 }

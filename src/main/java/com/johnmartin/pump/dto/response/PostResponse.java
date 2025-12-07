@@ -2,6 +2,7 @@ package com.johnmartin.pump.dto.response;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 public class PostResponse {
     private String id;
@@ -23,6 +24,8 @@ public class PostResponse {
     private int commentsCount;
     private int sharesCount;
 
+    private Set<String> likedUserIds;
+
     public PostResponse(String id,
                         String title,
                         String description,
@@ -34,7 +37,8 @@ public class PostResponse {
                         List<CommentResponse> comments,
                         int likesCount,
                         int commentsCount,
-                        int sharesCount) {
+                        int sharesCount,
+                        Set<String> likedUserIds) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -47,6 +51,7 @@ public class PostResponse {
         this.likesCount = likesCount;
         this.commentsCount = commentsCount;
         this.sharesCount = sharesCount;
+        this.likedUserIds = likedUserIds;
     }
 
     public String getId() {
@@ -145,12 +150,20 @@ public class PostResponse {
         this.sharesCount = sharesCount;
     }
 
+    public Set<String> getLikedUserIds() {
+        return likedUserIds;
+    }
+
+    public void setLikedUserIds(Set<String> likedUserIds) {
+        this.likedUserIds = likedUserIds;
+    }
+
     @Override
     public String toString() {
         return "PostResponse{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description
                + '\'' + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
                + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", comments="
                + comments + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount="
-               + sharesCount + '}';
+               + sharesCount + ", likedUserIds=" + likedUserIds + '}';
     }
 }
