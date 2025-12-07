@@ -59,7 +59,7 @@ public class PostController {
 
                 // Sort comments from oldest to newest
                 commentResponseList.sort(Comparator.comparing(CommentResponse::getCreatedAt));
-                PostResponse postResponse = PostMapper.toResponse(post, commentResponseList);
+                PostResponse postResponse = PostMapper.toResponse(post, commentResponseList, post.getUserId());
                 postResponseList.add(postResponse);
             }
 
@@ -95,7 +95,9 @@ public class PostController {
             PostEntity postToBeReturned = postService.savePost(createdPost);
             LoggerUtility.v(DEBUG_TAG, String.format("postToBeReturned: [%s]", postToBeReturned));
             return ResponseEntity.status(HttpStatus.CREATED)
-                                 .body(Result.success(PostMapper.toResponse(postToBeReturned, new ArrayList<>())));
+                                 .body(Result.success(PostMapper.toResponse(postToBeReturned,
+                                                                            new ArrayList<>(),
+                                                                            request.getUserId())));
         } catch (Exception e) {
             LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
@@ -124,7 +126,8 @@ public class PostController {
                                                                                                  .map(CommentMapper::toResponse)
                                                                                                  .toList());
                     PostResponse updatedPost = PostMapper.toResponse(postService.getPostById(postId),
-                                                                     commentResponseList);
+                                                                     commentResponseList,
+                                                                     userOpt.get().getId());
                     return ResponseEntity.ok(Result.success(updatedPost));
                 }
             }

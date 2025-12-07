@@ -7,19 +7,23 @@ import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.entities.PostEntity;
 
 public class PostMapper {
-    public static PostResponse toResponse(PostEntity postEntity, List<CommentResponse> comments) {
-        return new PostResponse(postEntity.getId(),
-                                postEntity.getTitle(),
-                                postEntity.getDescription(),
-                                postEntity.getUserId(),
-                                postEntity.getUserName(),
-                                postEntity.getUserProfileImageUrl(),
-                                postEntity.getCreatedAt(),
-                                postEntity.getUpdatedAt(),
+    public static PostResponse toResponse(PostEntity post, List<CommentResponse> comments, String currentUserId) {
+
+        boolean isLiked = post.getLikedUserIds() != null && post.getLikedUserIds().contains(currentUserId);
+
+        return new PostResponse(post.getId(),
+                                post.getTitle(),
+                                post.getDescription(),
+                                post.getUserId(),
+                                post.getUserName(),
+                                post.getUserProfileImageUrl(),
+                                post.getCreatedAt(),
+                                post.getUpdatedAt(),
                                 comments,
-                                postEntity.getLikesCount(),
-                                postEntity.getCommentsCount(),
-                                postEntity.getSharesCount(),
-                                postEntity.getLikedUserIds());
+                                post.getLikesCount(),
+                                post.getCommentsCount(),
+                                post.getSharesCount(),
+                                post.getLikedUserIds(),
+                                isLiked);
     }
 }

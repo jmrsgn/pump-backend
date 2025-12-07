@@ -26,6 +26,8 @@ public class PostResponse {
 
     private Set<String> likedUserIds;
 
+    private boolean isLikedByCurrentUser;
+
     public PostResponse(String id,
                         String title,
                         String description,
@@ -38,7 +40,8 @@ public class PostResponse {
                         int likesCount,
                         int commentsCount,
                         int sharesCount,
-                        Set<String> likedUserIds) {
+                        Set<String> likedUserIds,
+                        boolean isLikedByCurrentUser) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -52,6 +55,7 @@ public class PostResponse {
         this.commentsCount = commentsCount;
         this.sharesCount = sharesCount;
         this.likedUserIds = likedUserIds;
+        this.isLikedByCurrentUser = isLikedByCurrentUser;
     }
 
     public String getId() {
@@ -158,12 +162,21 @@ public class PostResponse {
         this.likedUserIds = likedUserIds;
     }
 
+    public boolean isLikedByCurrentUser() {
+        return isLikedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        isLikedByCurrentUser = likedByCurrentUser;
+    }
+
     @Override
     public String toString() {
         return "PostResponse{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description
                + '\'' + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
                + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", comments="
                + comments + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount="
-               + sharesCount + ", likedUserIds=" + likedUserIds + '}';
+               + sharesCount + ", likedUserIds=" + likedUserIds + ", isLikedByCurrentUser=" + isLikedByCurrentUser
+               + '}';
     }
 }
