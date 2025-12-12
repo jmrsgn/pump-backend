@@ -117,25 +117,24 @@ public class PostController {
             if (post == null) {
                 return ApiErrorUtils.createNotFoundErrorResponse(ApiErrorMessages.Post.POST_NOT_FOUND);
             } else {
-                // Prevent double-like
-                if (!CollectionUtils.containsAny(post.getLikedUserIds(), userOpt.get().getId())) {
+                // If user already liked the post, unlike
+                if (CollectionUtils.containsAny(post.getLikedUserIds(), userOpt.get().getId())) {
+                    postService.unlikePost(postId, userOpt.get().getId());
+                } else {
                     postService.likePost(postId, userOpt.get().getId());
-
-                    List<CommentEntity> commentEntityList = commentService.getCommentsFromPost(post.getId());
-                    List<CommentResponse> commentResponseList = new ArrayList<>(commentEntityList.stream()
-                                                                                                 .map(CommentMapper::toResponse)
-                                                                                                 .toList());
-                    PostResponse updatedPost = PostMapper.toResponse(postService.getPostById(postId),
-                                                                     commentResponseList,
-                                                                     userOpt.get().getId());
-                    return ResponseEntity.ok(Result.success(updatedPost));
                 }
+                List<CommentEntity> commentEntityList = commentService.getCommentsFromPost(post.getId());
+                List<CommentResponse> commentResponseList = new ArrayList<>(commentEntityList.stream()
+                                                                                             .map(CommentMapper::toResponse)
+                                                                                             .toList());
+                PostResponse updatedPost = PostMapper.toResponse(postService.getPostById(postId),
+                                                                 commentResponseList,
+                                                                 userOpt.get().getId());
+                return ResponseEntity.ok(Result.success(updatedPost));
             }
         } catch (Exception e) {
             LoggerUtility.e(DEBUG_TAG, e.getMessage(), e);
             return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
         }
-
-        return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
     }
 }

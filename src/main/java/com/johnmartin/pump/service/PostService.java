@@ -47,6 +47,13 @@ public class PostService {
         mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
     }
 
+    public void unlikePost(String postId, String userId) {
+        Update update = new Update().pull(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, -1);
+
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    }
+
     public void incrementCommentsCount(String postId) {
         Update update = new Update().inc(CommentEntityConstants.COLUMN_COMMENTS_COUNT, 1);
         mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
