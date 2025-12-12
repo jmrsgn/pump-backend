@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.johnmartin.pump.constants.CommentEntityConstants;
+import com.johnmartin.pump.constants.entities.CommentEntityConstants;
 
 @Document(collection = CommentEntityConstants.TABLE_NAME)
 public class CommentEntity {

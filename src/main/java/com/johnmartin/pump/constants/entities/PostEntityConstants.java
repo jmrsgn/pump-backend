@@ -1,4 +1,4 @@
-package com.johnmartin.pump.constants;
+package com.johnmartin.pump.constants.entities;
 
 public class PostEntityConstants {
     public static final String TABLE_NAME = "posts";

@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.johnmartin.pump.constants.PostEntityConstants;
+import com.johnmartin.pump.constants.entities.PostEntityConstants;
 
 @Document(collection = PostEntityConstants.TABLE_NAME)
 public class PostEntity {
@@ -130,5 +130,14 @@ public class PostEntity {
 
     public void setLikedUserIds(Set<String> likedUserIds) {
         this.likedUserIds = likedUserIds;
+    }
+
+    @Override
+    public String toString() {
+        return "PostEntity{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description + '\''
+               + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
+               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
+               + likesCount + ", commentsCount=" + commentsCount + ", sharesCount=" + sharesCount + ", likedUserIds="
+               + likedUserIds + '}';
     }
 }

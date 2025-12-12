@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.johnmartin.pump.constants.ApiConstants;
-import com.johnmartin.pump.constants.ApiErrorMessages;
+import com.johnmartin.pump.constants.api.ApiConstants;
+import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.dto.response.UserResponse;
 import com.johnmartin.pump.entities.UserEntity;

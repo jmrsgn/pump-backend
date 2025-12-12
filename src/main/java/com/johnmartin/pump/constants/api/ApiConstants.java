@@ -1,4 +1,4 @@
-package com.johnmartin.pump.constants;
+package com.johnmartin.pump.constants.api;
 
 public class ApiConstants {
 
@@ -25,5 +25,14 @@ public class ApiConstants {
 
     public static class Params {
         public static final String POST_ID = "postId";
+    }
+
+    public static class Error {
+        public static final String UNAUTHORIZED = "Unauthorized";
+        public static final String NOT_FOUND = "Not found";
+        public static final String BAD_REQUEST = "Bad Request";
+        public static final String CONFLICT = "Conflict";
+        public static final String FORBIDDEN = "Forbidden";
+        public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
     }
 }

@@ -3,7 +3,7 @@ package com.johnmartin.pump.entities;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.johnmartin.pump.constants.UserEntityConstants;
+import com.johnmartin.pump.constants.entities.UserEntityConstants;
 
 @Document(collection = UserEntityConstants.TABLE_NAME)
 public class UserEntity {

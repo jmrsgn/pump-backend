@@ -1,61 +1,130 @@
 package com.johnmartin.pump.service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import com.johnmartin.pump.constants.CommentEntityConstants;
-import com.johnmartin.pump.constants.PostEntityConstants;
+import com.johnmartin.pump.constants.api.ApiErrorMessages;
+import com.johnmartin.pump.dto.request.CreatePostRequest;
+import com.johnmartin.pump.dto.response.CommentResponse;
+import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.entities.PostEntity;
+import com.johnmartin.pump.entities.UserEntity;
+import com.johnmartin.pump.exception.BadRequestException;
+import com.johnmartin.pump.exception.ResourceNotFoundException;
+import com.johnmartin.pump.mapper.CommentMapper;
+import com.johnmartin.pump.mapper.PostMapper;
 import com.johnmartin.pump.repository.PostRepository;
+import com.johnmartin.pump.service.core.BaseService;
+import com.johnmartin.pump.utilities.LoggerUtility;
+
+import io.micrometer.common.util.StringUtils;
 
 @Service
-public class PostService {
+public class PostService extends BaseService {
+
+    private static final String DEBUG_TAG = PostService.class.getSimpleName();
 
     @Autowired
     private PostRepository postRepository;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
+    private CommentService commentService;
 
-    public List<PostEntity> getPosts() {
-        return postRepository.findAll();
+    /**
+     * Get posts with 10 latest comments
+     */
+    public List<PostResponse> getPostsWithLatestComments() {
+        LoggerUtility.d(DEBUG_TAG, "Execute method: [getPostsWithLatestComments]");
+
+        List<PostEntity> posts = Optional.ofNullable(postRepository.findAllByOrderByCreatedAtDesc())
+                                         .orElse(Collections.emptyList());
+
+        LoggerUtility.v(DEBUG_TAG, String.format("posts: [%s]", posts));
+
+        if (posts.isEmpty()) {
+            throw new ResourceNotFoundException(ApiErrorMessages.Post.THERE_ARE_NO_POST_AVAILABLE);
+        }
+
+        List<PostResponse> postResponses = posts.stream()
+                                                .map(this::mapPostToResponse)
+                                                .sorted(Comparator.comparing(PostResponse::getCreatedAt).reversed())
+                                                .toList();
+
+        LoggerUtility.v(DEBUG_TAG,
+                        String.format("postResponseList after sorting newest to oldest: [%s]", postResponses));
+
+        return postResponses;
     }
 
-    public List<PostEntity> getPostsFromUser(UUID userId) {
-        return postRepository.findAll().stream().filter(post -> post.getUserId().equals(userId.toString())).toList();
+    private PostResponse mapPostToResponse(PostEntity post) {
+        // Get last 10 comments
+        List<CommentResponse> commentResponses = commentService.getLatestComments(post.getId())
+                                                               .stream()
+                                                               .map(CommentMapper::toResponse)
+                                                               .sorted(Comparator.comparing(CommentResponse::getCreatedAt))
+                                                               .toList();
+
+        LoggerUtility.d(DEBUG_TAG,
+                        String.format("commentResponseList for post: [%s] sorted oldest to newest: [%s]",
+                                      post.getId(),
+                                      commentResponses));
+
+        return PostMapper.toResponse(post, commentResponses, post.getUserId());
     }
 
-    public PostEntity savePost(PostEntity post) {
-        return postRepository.save(post);
+    /**
+     * Create post
+     */
+    public PostResponse createPost(CreatePostRequest request) {
+        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [createPost] request: [%s]", request));
+
+        if (request == null) {
+            throw new BadRequestException(ApiErrorMessages.INVALID_REQUEST);
+        }
+
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_NOT_FOUND);
+        }
+
+        UserEntity user = getAuthenticatedUser();
+
+        PostEntity createdPost = new PostEntity();
+        createdPost.setTitle(request.getTitle());
+        createdPost.setDescription(request.getDescription());
+        createdPost.setUserId(user.getId());
+        createdPost.setUserName(user.getFirstName() + " " + user.getLastName());
+        createdPost.setUserProfileImageUrl(user.getProfileImageUrl());
+        createdPost.setLikesCount(0);
+        createdPost.setCommentsCount(0);
+        createdPost.setSharesCount(0);
+
+        LoggerUtility.v(DEBUG_TAG, String.format("createdPost: [%s]", createdPost));
+
+        // ID and Dates are generated by MongoDB after insertion
+        PostEntity postToBeReturned = postRepository.save(createdPost);
+        LoggerUtility.v(DEBUG_TAG, String.format("postToBeReturned: [%s]", postToBeReturned));
+        return PostMapper.toResponse(postToBeReturned, new ArrayList<>(), user.getId());
     }
 
-    public PostEntity getPostById(String postId) {
-        return postRepository.findById(postId).orElse(null);
-    }
+    //
+    // public PostEntity getPostById(String postId) {
+    // return postRepository.findById(postId).orElse(null);
+    // }
+    //
+    // public void likePost(String postId, String userId) {
+    // Update update = new Update().addToSet(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+    // .inc(PostEntityConstants.COLUMN_LIKES_COUNT, 1);
+    //
+    // mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    // }
+    //
+    // public void unlikePost(String postId, String userId) {
+    // Update update = new Update().pull(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+    // .inc(PostEntityConstants.COLUMN_LIKES_COUNT, -1);
+    //
+    // mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    // }
 
-    public void likePost(String postId, String userId) {
-        Update update = new Update().addToSet(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
-                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, 1);
-
-        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
-    }
-
-    public void unlikePost(String postId, String userId) {
-        Update update = new Update().pull(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
-                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, -1);
-
-        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
-    }
-
-    public void incrementCommentsCount(String postId) {
-        Update update = new Update().inc(CommentEntityConstants.COLUMN_COMMENTS_COUNT, 1);
-        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
-    }
 }

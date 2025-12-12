@@ -1,6 +1,6 @@
 package com.johnmartin.pump.exception;
 
-public class UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException() {
         super();
     }

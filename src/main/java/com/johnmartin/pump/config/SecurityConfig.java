@@ -10,7 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.johnmartin.pump.constants.ApiConstants;
+import com.johnmartin.pump.constants.api.ApiConstants;
+import com.johnmartin.pump.security.custom.CustomAccessDeniedHandler;
+import com.johnmartin.pump.security.custom.CustomAuthEntityPoint;
 import com.johnmartin.pump.security.JwtAuthenticationFilter;
 
 @Configuration
@@ -18,6 +20,12 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private CustomAuthEntityPoint customAuthEntityPoint;
+
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,6 +38,8 @@ public class SecurityConfig {
                                                          .permitAll()
                                                          .anyRequest()
                                                          .authenticated())
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntityPoint))
+            .exceptionHandling(ex -> ex.accessDeniedHandler(customAccessDeniedHandler))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(basic -> basic.realmName(ApiConstants.APP_NAME));
 
