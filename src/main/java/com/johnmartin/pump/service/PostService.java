@@ -1,5 +1,6 @@
 package com.johnmartin.pump.service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.johnmartin.pump.constants.UIConstants;
 import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.dto.request.CreatePostRequest;
+import com.johnmartin.pump.dto.request.UpdatePostRequest;
 import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.entities.UserEntity;
@@ -77,8 +79,12 @@ public class PostService extends BaseService {
     public PostResponse createPost(CreatePostRequest request) {
         LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [createPost] request: [%s]", request));
 
-        if (request == null || StringUtils.isBlank(request.getDescription())) {
+        if (request == null) {
             throw new BadRequestException(ApiErrorMessages.INVALID_REQUEST);
+        }
+
+        if (StringUtils.isBlank(request.getDescription())) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_DESCRIPTION_IS_REQUIRED);
         }
 
         UserEntity user = getAuthenticatedUser();
@@ -152,18 +158,6 @@ public class PostService extends BaseService {
     }
 
     /**
-     * Get post by post ID
-     * 
-     * @param postId
-     *            - Post ID
-     * @return PostEntity or null
-     */
-    private PostEntity getPostById(String postId) {
-        return postRepository.findById(postId)
-                             .orElseThrow(() -> new ResourceNotFoundException(ApiErrorMessages.Post.POST_NOT_FOUND));
-    }
-
-    /**
      * Delete a post
      * 
      * @param postId
@@ -192,6 +186,37 @@ public class PostService extends BaseService {
         postRepository.deleteById(postId);
     }
 
+    @Transactional
+    public PostResponse updatePost(String postId, UpdatePostRequest request) {
+        LoggerUtility.d(DEBUG_TAG,
+                        String.format("Execute method: [updatePost] postId: [%s] request: [%s]", postId, request));
+
+        if (StringUtils.isBlank(postId)) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
+        }
+
+        if (request == null) {
+            throw new BadRequestException(ApiErrorMessages.INVALID_REQUEST);
+        }
+
+        UserEntity user = getAuthenticatedUser();
+        PostEntity post = getPostById(postId);
+
+        // Only owner can edit
+        if (!post.getUserId().equals(user.getId())) {
+            throw new UnauthorizedException(ApiErrorMessages.User.YOU_ARE_NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION);
+        }
+
+        // Update allowed fields only
+        post.setTitle(request.getTitle());
+        post.setDescription(request.getDescription());
+        post.setUpdatedAt(Instant.now());
+
+        PostEntity updatedPost = postRepository.save(post);
+        LoggerUtility.v(DEBUG_TAG, String.format("updatedPost: [%s]", updatedPost));
+        return PostMapper.toResponse(updatedPost, commentService.getComments(postId, 0), user.getId());
+    }
+
     /**
      * Increment comments count
      * 
@@ -210,5 +235,17 @@ public class PostService extends BaseService {
      */
     public void decrementCommentsCount(String postId) {
         postRepository.decrementCommentsCount(postId);
+    }
+
+    /**
+     * Get post by post ID
+     *
+     * @param postId
+     *            - Post ID
+     * @return PostEntity or null
+     */
+    private PostEntity getPostById(String postId) {
+        return postRepository.findById(postId)
+                             .orElseThrow(() -> new ResourceNotFoundException(ApiErrorMessages.Post.POST_NOT_FOUND));
     }
 }

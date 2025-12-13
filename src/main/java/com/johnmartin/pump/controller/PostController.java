@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import com.johnmartin.pump.constants.api.ApiConstants;
 import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.dto.request.CreatePostRequest;
+import com.johnmartin.pump.dto.request.UpdatePostRequest;
 import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.service.PostService;
@@ -55,5 +56,12 @@ public class PostController {
     public ResponseEntity<Result<Void>> deletePost(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok(Result.success(null));
+    }
+
+    @PutMapping(ApiConstants.Path.POST_INFO)
+    public ResponseEntity<Result<PostResponse>> updatePost(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId,
+                                                           @Valid @RequestBody UpdatePostRequest request) {
+        PostResponse response = postService.updatePost(postId, request);
+        return ResponseEntity.ok(Result.success(response));
     }
 }
