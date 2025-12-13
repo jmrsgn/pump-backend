@@ -1,6 +1,10 @@
 package com.johnmartin.pump.mapper;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.johnmartin.pump.dto.response.CommentResponse;
 import com.johnmartin.pump.dto.response.PostResponse;
@@ -8,9 +12,6 @@ import com.johnmartin.pump.entities.PostEntity;
 
 public class PostMapper {
     public static PostResponse toResponse(PostEntity post, List<CommentResponse> comments, String currentUserId) {
-
-        boolean isLiked = post.getLikedUserIds() != null && post.getLikedUserIds().contains(currentUserId);
-
         return new PostResponse(post.getId(),
                                 post.getTitle(),
                                 post.getDescription(),
@@ -19,11 +20,20 @@ public class PostMapper {
                                 post.getUserProfileImageUrl(),
                                 post.getCreatedAt(),
                                 post.getUpdatedAt(),
-                                comments,
+
+                                // Comments are sorted from oldest to newest
+                                CollectionUtils.isEmpty(comments) ? new ArrayList<>()
+                                                                  : comments.stream()
+                                                                            .sorted(Comparator.comparing(CommentResponse::getCreatedAt))
+                                                                            .toList(),
                                 post.getLikesCount(),
                                 post.getCommentsCount(),
                                 post.getSharesCount(),
                                 post.getLikedUserIds(),
-                                isLiked);
+                                isLikedByCurrentUser(post, currentUserId));
+    }
+
+    private static boolean isLikedByCurrentUser(PostEntity post, String currentUserId) {
+        return post.getLikedUserIds() != null && post.getLikedUserIds().contains(currentUserId);
     }
 }

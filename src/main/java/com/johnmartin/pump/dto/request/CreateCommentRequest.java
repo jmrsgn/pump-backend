@@ -1,13 +1,16 @@
 package com.johnmartin.pump.dto.request;
 
+import com.johnmartin.pump.constants.api.ApiErrorMessages;
+
+import jakarta.validation.constraints.NotBlank;
+
 public class CreateCommentRequest {
 
+    @NotBlank(message = ApiErrorMessages.Comment.COMMENT_IS_REQUIRED)
     private String comment;
-    private String userId;
 
     public CreateCommentRequest(String comment, String userId) {
         this.comment = comment;
-        this.userId = userId;
     }
 
     public String getComment() {
@@ -16,13 +19,5 @@ public class CreateCommentRequest {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }

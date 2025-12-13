@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import com.johnmartin.pump.constants.entities.CommentEntityConstants;
+import com.johnmartin.pump.constants.entities.PostEntityConstants;
 import com.johnmartin.pump.entities.PostEntity;
 
 public class PostRepositoryCustomImpl implements PostRepositoryCustom {
@@ -16,7 +16,27 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 
     @Override
     public void incrementCommentsCount(String postId) {
-        Update update = new Update().inc(CommentEntityConstants.COLUMN_COMMENTS_COUNT, 1);
+        Update update = new Update().inc(PostEntityConstants.COLUMN_COMMENTS_COUNT, 1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    }
+
+    @Override
+    public void decrementCommentsCount(String postId) {
+        Update update = new Update().inc(PostEntityConstants.COLUMN_COMMENTS_COUNT, -1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    }
+
+    @Override
+    public void likePost(String userId, String postId) {
+        Update update = new Update().addToSet(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, 1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
+    }
+
+    @Override
+    public void unlikePost(String userId, String postId) {
+        Update update = new Update().pull(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
+                                    .inc(PostEntityConstants.COLUMN_LIKES_COUNT, -1);
         mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
     }
 }

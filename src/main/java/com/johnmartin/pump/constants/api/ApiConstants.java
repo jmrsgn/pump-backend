@@ -17,14 +17,18 @@ public class ApiConstants {
 
         // Post
         public static final String API_POST = API_BASE_V1 + "/post";
-        public static final String POST_LIKE = "/{postId}/like";
+        public static final String POST_INFO = "/{postId}";
+        public static final String POST_LIKE = POST_INFO + "/like";
 
         // Comment
         public static final String API_COMMENT = "/{postId}/comment";
+        public static final String COMMENT_INFO = API_COMMENT + "/{commentId}";
+        public static final String COMMENT_LIKE = COMMENT_INFO + "/like";
     }
 
     public static class Params {
         public static final String POST_ID = "postId";
+        public static final String COMMENT_ID = "commentId";
     }
 
     public static class Error {

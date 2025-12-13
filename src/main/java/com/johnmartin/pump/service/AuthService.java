@@ -35,7 +35,11 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     /**
-     * Register a new user
+     * Register a user
+     * 
+     * @param request
+     *            - RegisterRequest
+     * @return AuthResponse
      */
     public AuthResponse register(RegisterRequest request) {
         LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [register] request: [%s]", request));
@@ -72,7 +76,11 @@ public class AuthService {
     }
 
     /**
-     * Login user
+     * Login a user
+     * 
+     * @param request
+     *            - LoginRequest
+     * @return AuthResponse
      */
     public AuthResponse login(LoginRequest request) {
         LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [login] request: [%s]", request));

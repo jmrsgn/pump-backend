@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.utils.ApiErrorUtils;
 
+import jakarta.validation.ConstraintViolationException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -37,10 +39,30 @@ public class GlobalExceptionHandler {
         return ApiErrorUtils.createInternalServerErrorResponse(ApiErrorMessages.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Handle method argument not valid exception (used to validate request objects)
+     * 
+     * @param ex
+     *            - MethodArgumentNotValidException
+     * @return ResponseEntity
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         // Get the first error message will be thrown in Bean annotations for requests
         String message = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        return ApiErrorUtils.createBadRequestErrorResponse(message);
+    }
+
+    /**
+     * Handle constraint violated exception (used for validating path variables)
+     *
+     * @param ex
+     *            - ConstraintViolationException
+     * @return ResponseEntity
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().iterator().next().getMessage();
         return ApiErrorUtils.createBadRequestErrorResponse(message);
     }
 

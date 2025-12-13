@@ -110,4 +110,12 @@ public class CommentEntity {
     public void setRepliesCount(int repliesCount) {
         this.repliesCount = repliesCount;
     }
+
+    @Override
+    public String toString() {
+        return "CommentEntity{" + "id='" + id + '\'' + ", comment='" + comment + '\'' + ", userId='" + userId + '\''
+               + ", postId='" + postId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
+               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
+               + likesCount + ", repliesCount=" + repliesCount + '}';
+    }
 }

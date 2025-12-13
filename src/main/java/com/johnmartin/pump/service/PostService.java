@@ -1,25 +1,30 @@
 package com.johnmartin.pump.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.johnmartin.pump.constants.UIConstants;
 import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.dto.request.CreatePostRequest;
-import com.johnmartin.pump.dto.response.CommentResponse;
 import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.entities.UserEntity;
 import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.ResourceNotFoundException;
-import com.johnmartin.pump.mapper.CommentMapper;
+import com.johnmartin.pump.exception.UnauthorizedException;
 import com.johnmartin.pump.mapper.PostMapper;
 import com.johnmartin.pump.repository.PostRepository;
 import com.johnmartin.pump.service.core.BaseService;
 import com.johnmartin.pump.utilities.LoggerUtility;
 
-import io.micrometer.common.util.StringUtils;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PostService extends BaseService {
@@ -34,58 +39,46 @@ public class PostService extends BaseService {
 
     /**
      * Get posts with 10 latest comments
+     * 
+     * @param page
+     *            - page
+     * @return List of PostResponse
      */
-    public List<PostResponse> getPostsWithLatestComments() {
-        LoggerUtility.d(DEBUG_TAG, "Execute method: [getPostsWithLatestComments]");
+    public List<PostResponse> getPostsWithLatestComments(int page) {
+        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [getPostsWithLatestComments], page: [%d]", page));
 
-        List<PostEntity> posts = Optional.ofNullable(postRepository.findAllByOrderByCreatedAtDesc())
-                                         .orElse(Collections.emptyList());
-
-        LoggerUtility.v(DEBUG_TAG, String.format("posts: [%s]", posts));
+        PageRequest pageRequest = PageRequest.of(page, UIConstants.MINIMUM_POSTS);
+        Page<PostEntity> postPage = postRepository.findAllByOrderByCreatedAtDesc(pageRequest);
+        List<PostEntity> posts = postPage.getContent();
 
         if (posts.isEmpty()) {
             throw new ResourceNotFoundException(ApiErrorMessages.Post.THERE_ARE_NO_POST_AVAILABLE);
         }
 
         List<PostResponse> postResponses = posts.stream()
-                                                .map(this::mapPostToResponse)
-                                                .sorted(Comparator.comparing(PostResponse::getCreatedAt).reversed())
+                                                .map(post -> PostMapper.toResponse(post,
+                                                                                   commentService.getComments(post.getId(),
+                                                                                                              0),
+                                                                                   post.getUserId()))
                                                 .toList();
 
-        LoggerUtility.v(DEBUG_TAG,
-                        String.format("postResponseList after sorting newest to oldest: [%s]", postResponses));
+        LoggerUtility.v(DEBUG_TAG, String.format("postResponseList size: [%d]", postResponses.size()));
 
         return postResponses;
     }
 
-    private PostResponse mapPostToResponse(PostEntity post) {
-        // Get last 10 comments
-        List<CommentResponse> commentResponses = commentService.getLatestComments(post.getId())
-                                                               .stream()
-                                                               .map(CommentMapper::toResponse)
-                                                               .sorted(Comparator.comparing(CommentResponse::getCreatedAt))
-                                                               .toList();
-
-        LoggerUtility.d(DEBUG_TAG,
-                        String.format("commentResponseList for post: [%s] sorted oldest to newest: [%s]",
-                                      post.getId(),
-                                      commentResponses));
-
-        return PostMapper.toResponse(post, commentResponses, post.getUserId());
-    }
-
     /**
-     * Create post
+     * Create a post
+     * 
+     * @param request
+     *            - CreatePostRequest
+     * @return PostResponse
      */
     public PostResponse createPost(CreatePostRequest request) {
         LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [createPost] request: [%s]", request));
 
-        if (request == null) {
+        if (request == null || StringUtils.isBlank(request.getDescription())) {
             throw new BadRequestException(ApiErrorMessages.INVALID_REQUEST);
-        }
-
-        if (StringUtils.isBlank(request.getDescription())) {
-            throw new BadRequestException(ApiErrorMessages.Post.POST_NOT_FOUND);
         }
 
         UserEntity user = getAuthenticatedUser();
@@ -108,23 +101,114 @@ public class PostService extends BaseService {
         return PostMapper.toResponse(postToBeReturned, new ArrayList<>(), user.getId());
     }
 
-    //
-    // public PostEntity getPostById(String postId) {
-    // return postRepository.findById(postId).orElse(null);
-    // }
-    //
-    // public void likePost(String postId, String userId) {
-    // Update update = new Update().addToSet(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
-    // .inc(PostEntityConstants.COLUMN_LIKES_COUNT, 1);
-    //
-    // mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
-    // }
-    //
-    // public void unlikePost(String postId, String userId) {
-    // Update update = new Update().pull(PostEntityConstants.COLUMN_LIKED_USER_IDS, userId)
-    // .inc(PostEntityConstants.COLUMN_LIKES_COUNT, -1);
-    //
-    // mongoTemplate.updateFirst(Query.query(Criteria.where("_id").is(postId)), update, PostEntity.class);
-    // }
+    /**
+     * Like a post
+     * 
+     * @param postId
+     *            - Post ID
+     * @return PostResponse
+     */
+    public PostResponse likePost(String postId) {
+        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [likePost] postId: [%s]", postId));
 
+        if (StringUtils.isBlank(postId)) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
+        }
+
+        PostEntity post = getPostById(postId);
+        UserEntity user = getAuthenticatedUser();
+
+        // If user already liked the post, unlike
+        if (CollectionUtils.containsAny(post.getLikedUserIds(), user.getId())) {
+            postRepository.unlikePost(user.getId(), postId);
+        } else {
+            postRepository.likePost(user.getId(), postId);
+        }
+
+        // Get updated post to get updated like state
+        PostEntity updatedPost = getPostById(postId);
+        LoggerUtility.v(DEBUG_TAG, String.format("updatedPost: [%s]", updatedPost));
+        return PostMapper.toResponse(updatedPost, commentService.getComments(post.getId(), 0), user.getId());
+    }
+
+    /**
+     * Get post info
+     * 
+     * @param postId
+     *            - Post ID
+     * @return PostResponse
+     */
+    public PostResponse getPostInfo(String postId) {
+        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [getPostInfo] postId: [%s]", postId));
+
+        if (StringUtils.isBlank(postId)) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
+        }
+
+        UserEntity user = getAuthenticatedUser();
+        PostEntity postToBeReturned = getPostById(postId);
+        LoggerUtility.d(DEBUG_TAG, String.format("postToBeReturned: [%s]", postToBeReturned));
+        return PostMapper.toResponse(postToBeReturned, commentService.getComments(postId, 0), user.getId());
+    }
+
+    /**
+     * Get post by post ID
+     * 
+     * @param postId
+     *            - Post ID
+     * @return PostEntity or null
+     */
+    private PostEntity getPostById(String postId) {
+        return postRepository.findById(postId)
+                             .orElseThrow(() -> new ResourceNotFoundException(ApiErrorMessages.Post.POST_NOT_FOUND));
+    }
+
+    /**
+     * Delete a post
+     * 
+     * @param postId
+     *            - Post ID
+     */
+    @Transactional
+    public void deletePost(String postId) {
+        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [deletePost] postId: [%s]", postId));
+
+        if (StringUtils.isBlank(postId)) {
+            throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
+        }
+
+        UserEntity user = getAuthenticatedUser();
+        PostEntity post = getPostById(postId);
+
+        // Only post owner can delete
+        if (!post.getUserId().equals(user.getId())) {
+            throw new UnauthorizedException(ApiErrorMessages.User.YOU_ARE_NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION);
+        }
+
+        // Delete all comments under the post
+        commentService.deleteByPostId(postId);
+
+        // Delete the post
+        postRepository.deleteById(postId);
+    }
+
+    /**
+     * Increment comments count
+     * 
+     * @param postId
+     *            - Post ID
+     */
+    public void incrementCommentsCount(String postId) {
+        postRepository.incrementCommentsCount(postId);
+    }
+
+    /**
+     * Decrement comments count
+     *
+     * @param postId
+     *            - Post ID
+     */
+    public void decrementCommentsCount(String postId) {
+        postRepository.decrementCommentsCount(postId);
+    }
 }
