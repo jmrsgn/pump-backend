@@ -11,9 +11,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.johnmartin.pump.constants.api.ApiConstants;
+import com.johnmartin.pump.security.JwtAuthenticationFilter;
 import com.johnmartin.pump.security.custom.CustomAccessDeniedHandler;
 import com.johnmartin.pump.security.custom.CustomAuthEntityPoint;
-import com.johnmartin.pump.security.JwtAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -34,7 +34,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
 
             // Authorization rules
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.API_AUTH + "/**")
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.API_AUTH + "/**",
+                                                                          ApiConstants.Path.HEALTH)
                                                          .permitAll()
                                                          .anyRequest()
                                                          .authenticated())

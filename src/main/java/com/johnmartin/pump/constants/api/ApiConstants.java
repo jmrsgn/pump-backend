@@ -6,6 +6,8 @@ public class ApiConstants {
     public static final String API_BASE_V1 = "/api/v1";
 
     public static class Path {
+        public static final String HEALTH = "/health";
+
         // Auth
         public static final String API_AUTH = API_BASE_V1 + "/auth";
         public static final String LOGIN = "/login";
@@ -21,9 +23,8 @@ public class ApiConstants {
         public static final String POST_LIKE = POST_INFO + "/like";
 
         // Comment
-        public static final String API_COMMENT = "/{postId}/comment";
-        public static final String COMMENT_INFO = API_COMMENT + "/{commentId}";
-        public static final String COMMENT_LIKE = COMMENT_INFO + "/like";
+        public static final String API_COMMENT = API_POST + "/{postId}/comment";
+        public static final String COMMENT_INFO = "/{commentId}";
     }
 
     public static class Params {

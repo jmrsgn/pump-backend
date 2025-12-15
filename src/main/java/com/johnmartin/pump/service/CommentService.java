@@ -12,6 +12,7 @@ import com.johnmartin.pump.constants.api.ApiErrorMessages;
 import com.johnmartin.pump.dto.request.CreateCommentRequest;
 import com.johnmartin.pump.dto.response.CommentResponse;
 import com.johnmartin.pump.entities.CommentEntity;
+import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.entities.UserEntity;
 import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.ResourceNotFoundException;
@@ -66,12 +67,13 @@ public class CommentService extends BaseService {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
         }
 
+        PostEntity post = postService.getPostById(postId);
         UserEntity user = getAuthenticatedUser();
 
         CommentEntity createdComment = new CommentEntity();
         createdComment.setComment(request.getComment());
         createdComment.setUserId(user.getId());
-        createdComment.setPostId(postId);
+        createdComment.setPostId(post.getId());
         createdComment.setUserName(user.getFirstName() + " " + user.getLastName());
         createdComment.setUserProfileImageUrl(user.getProfileImageUrl());
         createdComment.setLikesCount(0);
@@ -106,6 +108,9 @@ public class CommentService extends BaseService {
         UserEntity user = getAuthenticatedUser();
         CommentEntity comment = getCommentById(commentId);
 
+        // Should i add this?
+        PostEntity post = postService.getPostById(postId);
+
         // Ensure comment belongs to the post
         if (!comment.getPostId().equals(postId)) {
             throw new BadRequestException(ApiErrorMessages.Comment.THE_COMMENT_DOES_NOT_BELONG_TO_THE_SPECIFIED_POST);
@@ -121,18 +126,6 @@ public class CommentService extends BaseService {
 
         // Decrement post comment count
         postService.decrementCommentsCount(postId);
-    }
-
-    /**
-     * Get comment by ID
-     * 
-     * @param commentId
-     *            - Comment ID
-     * @return CommentEntity
-     */
-    private CommentEntity getCommentById(String commentId) {
-        return commentRepository.findById(commentId)
-                                .orElseThrow(() -> new ResourceNotFoundException(ApiErrorMessages.Comment.COMMENT_NOT_FOUND));
     }
 
     /**
@@ -156,6 +149,19 @@ public class CommentService extends BaseService {
      *            - Post ID
      */
     public void deleteByPostId(String postId) {
-        commentRepository.deleteByPostId(postId);
+        PostEntity post = postService.getPostById(postId);
+        commentRepository.deleteByPostId(post.getId());
+    }
+
+    /**
+     * Get comment by ID
+     *
+     * @param commentId
+     *            - Comment ID
+     * @return CommentEntity
+     */
+    private CommentEntity getCommentById(String commentId) {
+        return commentRepository.findById(commentId)
+                                .orElseThrow(() -> new ResourceNotFoundException(ApiErrorMessages.Comment.COMMENT_NOT_FOUND));
     }
 }

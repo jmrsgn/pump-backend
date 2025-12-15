@@ -15,6 +15,7 @@ import com.johnmartin.pump.dto.request.UpdatePostRequest;
 import com.johnmartin.pump.dto.response.PostResponse;
 import com.johnmartin.pump.dto.response.Result;
 import com.johnmartin.pump.service.PostService;
+import com.johnmartin.pump.service.facade.PostCommentFacade;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -28,15 +29,18 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private PostCommentFacade postCommentFacade;
+
     @GetMapping
     public ResponseEntity<Result<List<PostResponse>>> getPosts(@RequestParam(defaultValue = "0") @PositiveOrZero int page) {
-        List<PostResponse> posts = postService.getPostsWithLatestComments(page);
+        List<PostResponse> posts = postCommentFacade.getPostsWithLatestComments(page);
         return ResponseEntity.ok(Result.success(posts));
     }
 
     @GetMapping(ApiConstants.Path.POST_INFO)
     public ResponseEntity<Result<PostResponse>> getPostInfo(@PathVariable @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId) {
-        PostResponse response = postService.getPostInfo(postId);
+        PostResponse response = postCommentFacade.getPostInfo(postId);
         return ResponseEntity.ok(Result.success(response));
     }
 
@@ -48,20 +52,20 @@ public class PostController {
 
     @PostMapping(ApiConstants.Path.POST_LIKE)
     public ResponseEntity<Result<PostResponse>> likePost(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId) {
-        PostResponse response = postService.likePost(postId);
+        PostResponse response = postCommentFacade.likePost(postId);
         return ResponseEntity.ok(Result.success(response));
     }
 
     @DeleteMapping(ApiConstants.Path.POST_INFO)
     public ResponseEntity<Result<Void>> deletePost(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId) {
-        postService.deletePost(postId);
+        postCommentFacade.deletePost(postId);
         return ResponseEntity.ok(Result.success(null));
     }
 
     @PutMapping(ApiConstants.Path.POST_INFO)
     public ResponseEntity<Result<PostResponse>> updatePost(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId,
                                                            @Valid @RequestBody UpdatePostRequest request) {
-        PostResponse response = postService.updatePost(postId, request);
+        PostResponse response = postCommentFacade.updatePost(postId, request);
         return ResponseEntity.ok(Result.success(response));
     }
 }
