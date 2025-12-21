@@ -1,23 +1,37 @@
-package com.johnmartin.pump.dto.request;
+package com.johnmartin.pump.dto;
 
-import com.johnmartin.pump.constants.api.ApiErrorMessages;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-
-public class RegisterRequest {
+public class AuthUser {
+    private String id;
     private String firstName;
     private String lastName;
-
-    @NotBlank(message = ApiErrorMessages.User.EMAIL_IS_REQUIRED)
-    @Email(message = ApiErrorMessages.User.EMAIL_MUST_BE_VALID)
     private String email;
     private String phone;
     private Integer role;
     private String profileImageUrl;
 
-    @NotBlank(message = ApiErrorMessages.User.PASSWORD_IS_REQUIRED)
-    private String password;
+    public AuthUser(String id,
+                    String firstName,
+                    String lastName,
+                    String email,
+                    String phone,
+                    Integer role,
+                    String profileImageUrl) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.role = role;
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -65,13 +79,5 @@ public class RegisterRequest {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

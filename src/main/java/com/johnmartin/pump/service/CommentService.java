@@ -9,23 +9,22 @@ import org.springframework.stereotype.Service;
 
 import com.johnmartin.pump.constants.UIConstants;
 import com.johnmartin.pump.constants.api.ApiErrorMessages;
+import com.johnmartin.pump.dto.AuthUser;
 import com.johnmartin.pump.dto.request.CreateCommentRequest;
 import com.johnmartin.pump.dto.response.CommentResponse;
 import com.johnmartin.pump.entities.CommentEntity;
 import com.johnmartin.pump.entities.PostEntity;
-import com.johnmartin.pump.entities.UserEntity;
 import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.ResourceNotFoundException;
 import com.johnmartin.pump.exception.UnauthorizedException;
 import com.johnmartin.pump.mapper.CommentMapper;
 import com.johnmartin.pump.repository.CommentRepository;
-import com.johnmartin.pump.service.core.BaseService;
 import com.johnmartin.pump.utilities.LoggerUtility;
 
 import jakarta.transaction.Transactional;
 
 @Service
-public class CommentService extends BaseService {
+public class CommentService {
 
     private static final String DEBUG_TAG = CommentService.class.getSimpleName();
 
@@ -53,13 +52,15 @@ public class CommentService extends BaseService {
     /**
      * Create a comment
      * 
+     * @param authUser
+     *            - Authenticated user
      * @param postId
      *            - Post ID
      * @param request
      *            - CreateCommentRequest
      * @return CommentResponse
      */
-    public CommentResponse createComment(String postId, CreateCommentRequest request) {
+    public CommentResponse createComment(AuthUser authUser, String postId, CreateCommentRequest request) {
         LoggerUtility.d(DEBUG_TAG,
                         String.format("Execute method: [createComment] postId: [%s] request: [%s]", postId, request));
 
@@ -68,14 +69,13 @@ public class CommentService extends BaseService {
         }
 
         PostEntity post = postService.getPostById(postId);
-        UserEntity user = getAuthenticatedUser();
 
         CommentEntity createdComment = new CommentEntity();
         createdComment.setComment(request.getComment());
-        createdComment.setUserId(user.getId());
+        createdComment.setUserId(authUser.getId());
         createdComment.setPostId(post.getId());
-        createdComment.setUserName(user.getFirstName() + " " + user.getLastName());
-        createdComment.setUserProfileImageUrl(user.getProfileImageUrl());
+        createdComment.setUserName(authUser.getFirstName() + " " + authUser.getLastName());
+        createdComment.setUserProfileImageUrl(authUser.getProfileImageUrl());
         createdComment.setLikesCount(0);
         createdComment.setRepliesCount(0);
 
@@ -87,11 +87,13 @@ public class CommentService extends BaseService {
 
     /**
      * Delete a comment
-     * 
+     *
+     * @param authUser
+     *            - Authenticated user
      * @param commentId
      *            - Comment ID
      */
-    public void deleteComment(String postId, String commentId) {
+    public void deleteComment(AuthUser authUser, String postId, String commentId) {
         LoggerUtility.d(DEBUG_TAG,
                         String.format("Execute method: [deleteComment] postId: [%s] commentId: [%s]",
                                       postId,
@@ -105,7 +107,6 @@ public class CommentService extends BaseService {
             throw new BadRequestException(ApiErrorMessages.Comment.COMMENT_ID_IS_REQUIRED);
         }
 
-        UserEntity user = getAuthenticatedUser();
         CommentEntity comment = getCommentById(commentId);
 
         // Should i add this?
@@ -117,7 +118,7 @@ public class CommentService extends BaseService {
         }
 
         // Only comment owner can delete
-        if (!comment.getUserId().equals(user.getId())) {
+        if (!comment.getUserId().equals(authUser.getId())) {
             throw new UnauthorizedException(ApiErrorMessages.User.YOU_ARE_NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION);
         }
 

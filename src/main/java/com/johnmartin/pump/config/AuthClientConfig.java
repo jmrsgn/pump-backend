@@ -1,0 +1,16 @@
+package com.johnmartin.pump.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
+
+import com.johnmartin.pump.constants.api.ApiConstants;
+
+@Configuration
+public class AuthClientConfig {
+
+    @Bean
+    public RestClient authWebClient() {
+        return RestClient.builder().baseUrl(ApiConstants.PumpAuthService.URL).build();
+    }
+}
