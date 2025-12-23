@@ -19,11 +19,11 @@ public class PostEntity {
     private String title;
     private String description;
 
-    private String userId;
+    private String authorId;
 
     // Store user basic info for faster frontend rendering
-    private String userName;
-    private String userProfileImageUrl;
+    private String author;
+    private String authorProfileImageUrl;
 
     @CreatedDate
     private Instant createdAt;
@@ -34,7 +34,7 @@ public class PostEntity {
     private int commentsCount;
     private int sharesCount;
 
-    private Set<String> likedUserIds = new HashSet<>();
+    private Set<String> likedByUserIds = new HashSet<>();
 
     public String getId() {
         return id;
@@ -60,28 +60,28 @@ public class PostEntity {
         this.description = description;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAuthorId() {
+        return authorId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public String getUserProfileImageUrl() {
-        return userProfileImageUrl;
+    public String getAuthorProfileImageUrl() {
+        return authorProfileImageUrl;
     }
 
-    public void setUserProfileImageUrl(String userProfileImageUrl) {
-        this.userProfileImageUrl = userProfileImageUrl;
+    public void setAuthorProfileImageUrl(String authorProfileImageUrl) {
+        this.authorProfileImageUrl = authorProfileImageUrl;
     }
 
     public Instant getCreatedAt() {
@@ -124,20 +124,19 @@ public class PostEntity {
         this.sharesCount = sharesCount;
     }
 
-    public Set<String> getLikedUserIds() {
-        return likedUserIds;
+    public Set<String> getLikedByUserIds() {
+        return likedByUserIds;
     }
 
-    public void setLikedUserIds(Set<String> likedUserIds) {
-        this.likedUserIds = likedUserIds;
+    public void setLikedByUserIds(Set<String> likedByUserIds) {
+        this.likedByUserIds = likedByUserIds;
     }
 
     @Override
     public String toString() {
         return "PostEntity{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description + '\''
-               + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
-               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
-               + likesCount + ", commentsCount=" + commentsCount + ", sharesCount=" + sharesCount + ", likedUserIds="
-               + likedUserIds + '}';
+               + ", author='" + author + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+               + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount=" + sharesCount
+               + '}';
     }
 }

@@ -44,4 +44,12 @@ public class CommentController {
         return ResponseEntity.ok(Result.success(null));
     }
 
+    @PostMapping(ApiConstants.Path.COMMENT_LIKE)
+    public ResponseEntity<Result<CommentResponse>> likeComment(@PathVariable(ApiConstants.Params.POST_ID) @NotBlank(message = ApiErrorMessages.Post.POST_ID_IS_REQUIRED) String postId,
+                                                               @PathVariable(ApiConstants.Params.COMMENT_ID) @NotBlank(message = ApiErrorMessages.Comment.COMMENT_ID_IS_REQUIRED) String commentId,
+                                                               HttpServletRequest request) {
+        AuthUser authUser = AuthUtils.requireAuthUser(request);
+        CommentResponse response = commentService.likeComment(authUser, postId, commentId);
+        return ResponseEntity.ok(Result.success(response));
+    }
 }

@@ -9,11 +9,11 @@ public class PostResponse {
     private String title;
     private String description;
 
-    private String userId;
+    private String authorId;
 
     // Store user basic info for faster frontend rendering
-    private String userName;
-    private String userProfileImageUrl;
+    private String author;
+    private String authorProfileImageUrl;
 
     private Instant createdAt;
     private Instant updatedAt;
@@ -24,37 +24,37 @@ public class PostResponse {
     private int commentsCount;
     private int sharesCount;
 
-    private Set<String> likedUserIds;
+    private Set<String> likedByUserIds;
 
     private boolean isLikedByCurrentUser;
 
     public PostResponse(String id,
                         String title,
                         String description,
-                        String userId,
-                        String userName,
-                        String userProfileImageUrl,
+                        String authorId,
+                        String author,
+                        String authorProfileImageUrl,
                         Instant createdAt,
                         Instant updatedAt,
                         List<CommentResponse> comments,
                         int likesCount,
                         int commentsCount,
                         int sharesCount,
-                        Set<String> likedUserIds,
+                        Set<String> likedByUserIds,
                         boolean isLikedByCurrentUser) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.userId = userId;
-        this.userName = userName;
-        this.userProfileImageUrl = userProfileImageUrl;
+        this.authorId = authorId;
+        this.author = author;
+        this.authorProfileImageUrl = authorProfileImageUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.comments = comments;
         this.likesCount = likesCount;
         this.commentsCount = commentsCount;
         this.sharesCount = sharesCount;
-        this.likedUserIds = likedUserIds;
+        this.likedByUserIds = likedByUserIds;
         this.isLikedByCurrentUser = isLikedByCurrentUser;
     }
 
@@ -82,28 +82,28 @@ public class PostResponse {
         this.description = description;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAuthorId() {
+        return authorId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public String getUserProfileImageUrl() {
-        return userProfileImageUrl;
+    public String getAuthorProfileImageUrl() {
+        return authorProfileImageUrl;
     }
 
-    public void setUserProfileImageUrl(String userProfileImageUrl) {
-        this.userProfileImageUrl = userProfileImageUrl;
+    public void setAuthorProfileImageUrl(String authorProfileImageUrl) {
+        this.authorProfileImageUrl = authorProfileImageUrl;
     }
 
     public Instant getCreatedAt() {
@@ -154,12 +154,12 @@ public class PostResponse {
         this.sharesCount = sharesCount;
     }
 
-    public Set<String> getLikedUserIds() {
-        return likedUserIds;
+    public Set<String> getLikedByUserIds() {
+        return likedByUserIds;
     }
 
-    public void setLikedUserIds(Set<String> likedUserIds) {
-        this.likedUserIds = likedUserIds;
+    public void setLikedByUserIds(Set<String> likedByUserIds) {
+        this.likedByUserIds = likedByUserIds;
     }
 
     public boolean isLikedByCurrentUser() {
@@ -173,10 +173,8 @@ public class PostResponse {
     @Override
     public String toString() {
         return "PostResponse{" + "id='" + id + '\'' + ", title='" + title + '\'' + ", description='" + description
-               + '\'' + ", userId='" + userId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
-               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", comments="
-               + comments + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount="
-               + sharesCount + ", likedUserIds=" + likedUserIds + ", isLikedByCurrentUser=" + isLikedByCurrentUser
+               + '\'' + ", author='" + author + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+               + ", likesCount=" + likesCount + ", commentsCount=" + commentsCount + ", sharesCount=" + sharesCount
                + '}';
     }
 }

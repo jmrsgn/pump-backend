@@ -15,9 +15,9 @@ public class PostMapper {
         return new PostResponse(post.getId(),
                                 post.getTitle(),
                                 post.getDescription(),
-                                post.getUserId(),
-                                post.getUserName(),
-                                post.getUserProfileImageUrl(),
+                                post.getAuthorId(),
+                                post.getAuthor(),
+                                post.getAuthorProfileImageUrl(),
                                 post.getCreatedAt(),
                                 post.getUpdatedAt(),
 
@@ -29,11 +29,11 @@ public class PostMapper {
                                 post.getLikesCount(),
                                 post.getCommentsCount(),
                                 post.getSharesCount(),
-                                post.getLikedUserIds(),
+                                post.getLikedByUserIds(),
                                 isLikedByCurrentUser(post, currentUserId));
     }
 
     private static boolean isLikedByCurrentUser(PostEntity post, String currentUserId) {
-        return post.getLikedUserIds() != null && post.getLikedUserIds().contains(currentUserId);
+        return post.getLikedByUserIds() != null && post.getLikedByUserIds().contains(currentUserId);
     }
 }

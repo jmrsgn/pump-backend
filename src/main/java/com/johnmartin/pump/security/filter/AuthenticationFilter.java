@@ -2,6 +2,7 @@ package com.johnmartin.pump.security.filter;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -44,8 +45,7 @@ public class AuthenticationFilter implements Filter {
         String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
+        if (StringUtils.isBlank(authHeader) || !authHeader.startsWith("Bearer ")) {
             httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
             httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
 

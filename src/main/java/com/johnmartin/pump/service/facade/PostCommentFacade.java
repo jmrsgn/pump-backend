@@ -57,6 +57,7 @@ public class PostCommentFacade {
                                               : posts.stream()
                                                      .map(post -> PostMapper.toResponse(post,
                                                                                         commentService.getComments(post.getId(),
+                                                                                                                   authUser.getId(),
                                                                                                                    0),
                                                                                         authUser.getId()))
                                                      .toList();
@@ -80,7 +81,9 @@ public class PostCommentFacade {
 
         PostEntity postToBeReturned = postService.getPostById(postId);
         LoggerUtility.d(clazz, String.format("postToBeReturned: [%s]", postToBeReturned));
-        return PostMapper.toResponse(postToBeReturned, commentService.getComments(postId, 0), authUser.getId());
+        return PostMapper.toResponse(postToBeReturned,
+                                     commentService.getComments(postToBeReturned.getId(), authUser.getId(), 0),
+                                     authUser.getId());
     }
 
     /**
@@ -102,16 +105,18 @@ public class PostCommentFacade {
         PostEntity post = postService.getPostById(postId);
 
         // If user already liked the post, unlike
-        if (CollectionUtils.containsAny(post.getLikedUserIds(), authUser.getId())) {
-            postService.unlikePost(authUser.getId(), postId);
+        if (CollectionUtils.containsAny(post.getLikedByUserIds(), authUser.getId())) {
+            postService.unlikePost(authUser.getId(), post.getId());
         } else {
-            postService.likePost(authUser.getId(), postId);
+            postService.likePost(authUser.getId(), post.getId());
         }
 
         // Get updated post to get updated like state
-        PostEntity updatedPost = postService.getPostById(postId);
+        PostEntity updatedPost = postService.getPostById(post.getId());
         LoggerUtility.t(clazz, String.format("updatedPost: [%s]", updatedPost));
-        return PostMapper.toResponse(updatedPost, commentService.getComments(post.getId(), 0), authUser.getId());
+        return PostMapper.toResponse(updatedPost,
+                                     commentService.getComments(updatedPost.getId(), authUser.getId(), 0),
+                                     authUser.getId());
     }
 
     /**
@@ -133,15 +138,15 @@ public class PostCommentFacade {
         PostEntity post = postService.getPostById(postId);
 
         // Only post owner can delete
-        if (!post.getUserId().equals(authUser.getId())) {
+        if (!post.getAuthorId().equals(authUser.getId())) {
             throw new UnauthorizedException(ApiErrorMessages.User.YOU_ARE_NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION);
         }
 
         // Delete all comments under the post
-        commentService.deleteByPostId(postId);
+        commentService.deleteByPostId(post.getId());
 
         // Delete the post
-        postService.deletePost(postId);
+        postService.deletePost(post.getId());
     }
 
     @Transactional
@@ -160,7 +165,7 @@ public class PostCommentFacade {
         PostEntity post = postService.getPostById(postId);
 
         // Only owner can edit
-        if (!post.getUserId().equals(authUser.getId())) {
+        if (!post.getAuthorId().equals(authUser.getId())) {
             throw new UnauthorizedException(ApiErrorMessages.User.YOU_ARE_NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION);
         }
 
@@ -171,6 +176,8 @@ public class PostCommentFacade {
 
         PostEntity updatedPost = postService.savePost(post);
         LoggerUtility.t(clazz, String.format("updatedPost: [%s]", updatedPost));
-        return PostMapper.toResponse(updatedPost, commentService.getComments(postId, 0), authUser.getId());
+        return PostMapper.toResponse(updatedPost,
+                                     commentService.getComments(updatedPost.getId(), authUser.getId(), 0),
+                                     authUser.getId());
     }
 }

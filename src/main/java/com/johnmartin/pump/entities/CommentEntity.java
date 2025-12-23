@@ -1,6 +1,8 @@
 package com.johnmartin.pump.entities;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -16,12 +18,12 @@ public class CommentEntity {
     private String id;
     private String comment;
 
-    private String userId;
+    private String authorId;
     private String postId;
 
     // Store user basic info for faster frontend rendering
-    private String userName;
-    private String userProfileImageUrl;
+    private String author;
+    private String authorProfileImageUrl;
 
     @CreatedDate
     private Instant createdAt;
@@ -30,6 +32,8 @@ public class CommentEntity {
 
     private int likesCount;
     private int repliesCount;
+
+    private Set<String> likedByUserIds = new HashSet<>();
 
     public String getId() {
         return id;
@@ -47,12 +51,12 @@ public class CommentEntity {
         this.comment = comment;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAuthorId() {
+        return authorId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
     public String getPostId() {
@@ -63,20 +67,20 @@ public class CommentEntity {
         this.postId = postId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public String getUserProfileImageUrl() {
-        return userProfileImageUrl;
+    public String getAuthorProfileImageUrl() {
+        return authorProfileImageUrl;
     }
 
-    public void setUserProfileImageUrl(String userProfileImageUrl) {
-        this.userProfileImageUrl = userProfileImageUrl;
+    public void setAuthorProfileImageUrl(String authorProfileImageUrl) {
+        this.authorProfileImageUrl = authorProfileImageUrl;
     }
 
     public Instant getCreatedAt() {
@@ -111,11 +115,18 @@ public class CommentEntity {
         this.repliesCount = repliesCount;
     }
 
+    public Set<String> getLikedByUserIds() {
+        return likedByUserIds;
+    }
+
+    public void setLikedByUserIds(Set<String> likedByUserIds) {
+        this.likedByUserIds = likedByUserIds;
+    }
+
     @Override
     public String toString() {
-        return "CommentEntity{" + "id='" + id + '\'' + ", comment='" + comment + '\'' + ", userId='" + userId + '\''
-               + ", postId='" + postId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
-               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
-               + likesCount + ", repliesCount=" + repliesCount + '}';
+        return "CommentEntity{" + "id='" + id + '\'' + ", comment='" + comment + '\'' + ", postId='" + postId + '\''
+               + ", author='" + author + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+               + ", likesCount=" + likesCount + ", repliesCount=" + repliesCount + '}';
     }
 }

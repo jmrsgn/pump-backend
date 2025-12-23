@@ -1,17 +1,18 @@
 package com.johnmartin.pump.dto.response;
 
 import java.time.Instant;
+import java.util.Set;
 
 public class CommentResponse {
     private String id;
     private String comment;
 
-    private String userId;
+    private String authorId;
     private String postId;
 
     // Store user basic info for faster frontend rendering
-    private String userName;
-    private String userProfileImageUrl;
+    private String author;
+    private String authorProfileImageUrl;
 
     private Instant createdAt;
     private Instant updatedAt;
@@ -19,26 +20,34 @@ public class CommentResponse {
     private int likesCount;
     private int repliesCount;
 
+    private Set<String> likedByUserIds;
+
+    private boolean isLikedByCurrentUser;
+
     public CommentResponse(String id,
                            String comment,
-                           String userId,
+                           String authorId,
                            String postId,
-                           String userName,
-                           String userProfileImageUrl,
+                           String author,
+                           String authorProfileImageUrl,
                            Instant createdAt,
                            Instant updatedAt,
                            int likesCount,
-                           int repliesCount) {
+                           int repliesCount,
+                           Set<String> likedByUserIds,
+                           boolean isLikedByCurrentUser) {
         this.id = id;
         this.comment = comment;
-        this.userId = userId;
+        this.authorId = authorId;
         this.postId = postId;
-        this.userName = userName;
-        this.userProfileImageUrl = userProfileImageUrl;
+        this.author = author;
+        this.authorProfileImageUrl = authorProfileImageUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.likesCount = likesCount;
         this.repliesCount = repliesCount;
+        this.likedByUserIds = likedByUserIds;
+        this.isLikedByCurrentUser = isLikedByCurrentUser;
     }
 
     public String getId() {
@@ -57,12 +66,12 @@ public class CommentResponse {
         this.comment = comment;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAuthorId() {
+        return authorId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
     }
 
     public String getPostId() {
@@ -73,20 +82,20 @@ public class CommentResponse {
         this.postId = postId;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getAuthor() {
+        return author;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setAuthor(String author) {
+        this.author = author;
     }
 
-    public String getUserProfileImageUrl() {
-        return userProfileImageUrl;
+    public String getAuthorProfileImageUrl() {
+        return authorProfileImageUrl;
     }
 
-    public void setUserProfileImageUrl(String userProfileImageUrl) {
-        this.userProfileImageUrl = userProfileImageUrl;
+    public void setAuthorProfileImageUrl(String authorProfileImageUrl) {
+        this.authorProfileImageUrl = authorProfileImageUrl;
     }
 
     public Instant getCreatedAt() {
@@ -121,11 +130,26 @@ public class CommentResponse {
         this.repliesCount = repliesCount;
     }
 
+    public Set<String> getLikedByUserIds() {
+        return likedByUserIds;
+    }
+
+    public void setLikedByUserIds(Set<String> likedByUserIds) {
+        this.likedByUserIds = likedByUserIds;
+    }
+
+    public boolean isLikedByCurrentUser() {
+        return isLikedByCurrentUser;
+    }
+
+    public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+        isLikedByCurrentUser = likedByCurrentUser;
+    }
+
     @Override
     public String toString() {
-        return "CommentResponse{" + "id='" + id + '\'' + ", comment='" + comment + '\'' + ", userId='" + userId + '\''
-               + ", postId='" + postId + '\'' + ", userName='" + userName + '\'' + ", userProfileImageUrl='"
-               + userProfileImageUrl + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", likesCount="
-               + likesCount + ", repliesCount=" + repliesCount + '}';
+        return "CommentResponse{" + "id='" + id + '\'' + ", comment='" + comment + '\'' + ", postId='" + postId + '\''
+               + ", author='" + author + '\'' + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+               + ", likesCount=" + likesCount + ", repliesCount=" + repliesCount + '}';
     }
 }

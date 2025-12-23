@@ -50,9 +50,9 @@ public class PostService {
         PostEntity createdPost = new PostEntity();
         createdPost.setTitle(request.getTitle());
         createdPost.setDescription(request.getDescription());
-        createdPost.setUserId(authUser.getId());
-        createdPost.setUserName(authUser.getFirstName() + " " + authUser.getLastName());
-        createdPost.setUserProfileImageUrl(authUser.getProfileImageUrl());
+        createdPost.setAuthorId(authUser.getId());
+        createdPost.setAuthor(authUser.getFirstName() + " " + authUser.getLastName());
+        createdPost.setAuthorProfileImageUrl(authUser.getProfileImageUrl());
         createdPost.setLikesCount(0);
         createdPost.setCommentsCount(0);
         createdPost.setSharesCount(0);

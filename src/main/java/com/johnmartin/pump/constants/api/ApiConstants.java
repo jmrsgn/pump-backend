@@ -22,6 +22,7 @@ public class ApiConstants {
         // Comment
         public static final String API_COMMENT = API_POST + "/{postId}/comment";
         public static final String COMMENT_INFO = "/{commentId}";
+        public static final String COMMENT_LIKE = COMMENT_INFO + "/like";
     }
 
     public static class Params {
