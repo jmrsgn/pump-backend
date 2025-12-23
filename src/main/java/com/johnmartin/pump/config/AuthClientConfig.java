@@ -12,5 +12,6 @@ public class AuthClientConfig {
     @Bean
     public RestClient authWebClient() {
         return RestClient.builder().baseUrl(ApiConstants.PumpAuthService.URL).build();
+        // return RestClient.builder().baseUrl("http://localhost:8081").build();
     }
 }

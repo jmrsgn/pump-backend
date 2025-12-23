@@ -22,7 +22,7 @@ import com.johnmartin.pump.utils.ApiErrorUtils;
 @RequestMapping(ApiConstants.Path.API_USER)
 public class UserController {
 
-    private static final String DEBUG_TAG = UserController.class.getSimpleName();
+    private static final Class<UserController> clazz = UserController.class;
 
     @Autowired
     private UserService userService;
@@ -35,7 +35,7 @@ public class UserController {
         }
 
         UserEntity userEntity = userOpt.get();
-        LoggerUtility.v(DEBUG_TAG, String.format("userEntity: [%s]", userEntity));
+        LoggerUtility.t(clazz, String.format("userEntity: [%s]", userEntity));
         return ResponseEntity.ok(Result.success(UserMapper.toResponse(userEntity)));
     }
 }

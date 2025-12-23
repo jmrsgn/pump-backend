@@ -34,12 +34,11 @@ public class ApiConstants {
         public static final String NOT_FOUND = "Not found";
         public static final String BAD_REQUEST = "Bad Request";
         public static final String CONFLICT = "Conflict";
-        public static final String FORBIDDEN = "Forbidden";
         public static final String INTERNAL_SERVER_ERROR = "Internal Server Error";
     }
 
     public static class PumpAuthService {
         public static final String URL = "http://pump-auth-service:8080";
-        // public static final String URL = "http://localhost:8081";
+        public static final String API_VALIDATE = API_BASE_V1 + "/internal/auth/validate";
     }
 }

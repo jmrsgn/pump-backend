@@ -20,7 +20,6 @@ import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.UnauthorizedException;
 import com.johnmartin.pump.mapper.PostMapper;
-import com.johnmartin.pump.repository.PostRepository;
 import com.johnmartin.pump.service.CommentService;
 import com.johnmartin.pump.service.PostService;
 import com.johnmartin.pump.utilities.LoggerUtility;
@@ -30,16 +29,13 @@ import jakarta.transaction.Transactional;
 @Service
 public class PostCommentFacade {
 
-    private static final String DEBUG_TAG = PostCommentFacade.class.getSimpleName();
+    private static final Class<PostCommentFacade> clazz = PostCommentFacade.class;
 
     @Autowired
     private PostService postService;
 
     @Autowired
     private CommentService commentService;
-
-    @Autowired
-    private PostRepository postRepository;
 
     /**
      * Get posts with 10 latest comments
@@ -51,10 +47,10 @@ public class PostCommentFacade {
      * @return List of PostResponse
      */
     public List<PostResponse> getPostsWithLatestComments(AuthUser authUser, int page) {
-        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [getPostsWithLatestComments], page: [%d]", page));
+        LoggerUtility.d(clazz, String.format("Execute method: [getPostsWithLatestComments], page: [%d]", page));
 
         PageRequest pageRequest = PageRequest.of(page, UIConstants.MINIMUM_POSTS);
-        Page<PostEntity> postPage = postRepository.findAllByOrderByCreatedAtDesc(pageRequest);
+        Page<PostEntity> postPage = postService.getPostsWithLatestComments(pageRequest);
         List<PostEntity> posts = postPage.getContent();
 
         return CollectionUtils.isEmpty(posts) ? Collections.emptyList()
@@ -76,14 +72,14 @@ public class PostCommentFacade {
      * @return PostResponse
      */
     public PostResponse getPostInfo(AuthUser authUser, String postId) {
-        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [getPostInfo] postId: [%s]", postId));
+        LoggerUtility.d(clazz, String.format("Execute method: [getPostInfo] postId: [%s]", postId));
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
         }
 
         PostEntity postToBeReturned = postService.getPostById(postId);
-        LoggerUtility.d(DEBUG_TAG, String.format("postToBeReturned: [%s]", postToBeReturned));
+        LoggerUtility.d(clazz, String.format("postToBeReturned: [%s]", postToBeReturned));
         return PostMapper.toResponse(postToBeReturned, commentService.getComments(postId, 0), authUser.getId());
     }
 
@@ -97,7 +93,7 @@ public class PostCommentFacade {
      * @return PostResponse
      */
     public PostResponse likePost(AuthUser authUser, String postId) {
-        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [likePost] postId: [%s]", postId));
+        LoggerUtility.d(clazz, String.format("Execute method: [likePost] postId: [%s]", postId));
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
@@ -107,14 +103,14 @@ public class PostCommentFacade {
 
         // If user already liked the post, unlike
         if (CollectionUtils.containsAny(post.getLikedUserIds(), authUser.getId())) {
-            postRepository.unlikePost(authUser.getId(), postId);
+            postService.unlikePost(authUser.getId(), postId);
         } else {
-            postRepository.likePost(authUser.getId(), postId);
+            postService.likePost(authUser.getId(), postId);
         }
 
         // Get updated post to get updated like state
         PostEntity updatedPost = postService.getPostById(postId);
-        LoggerUtility.v(DEBUG_TAG, String.format("updatedPost: [%s]", updatedPost));
+        LoggerUtility.t(clazz, String.format("updatedPost: [%s]", updatedPost));
         return PostMapper.toResponse(updatedPost, commentService.getComments(post.getId(), 0), authUser.getId());
     }
 
@@ -128,7 +124,7 @@ public class PostCommentFacade {
      */
     @Transactional
     public void deletePost(AuthUser authUser, String postId) {
-        LoggerUtility.d(DEBUG_TAG, String.format("Execute method: [deletePost] postId: [%s]", postId));
+        LoggerUtility.d(clazz, String.format("Execute method: [deletePost] postId: [%s]", postId));
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
@@ -145,12 +141,12 @@ public class PostCommentFacade {
         commentService.deleteByPostId(postId);
 
         // Delete the post
-        postRepository.deleteById(postId);
+        postService.deletePost(postId);
     }
 
     @Transactional
     public PostResponse updatePost(AuthUser authUser, String postId, UpdatePostRequest request) {
-        LoggerUtility.d(DEBUG_TAG,
+        LoggerUtility.d(clazz,
                         String.format("Execute method: [updatePost] postId: [%s] request: [%s]", postId, request));
 
         if (StringUtils.isBlank(postId)) {
@@ -173,8 +169,8 @@ public class PostCommentFacade {
         post.setDescription(request.getDescription());
         post.setUpdatedAt(Instant.now());
 
-        PostEntity updatedPost = postRepository.save(post);
-        LoggerUtility.v(DEBUG_TAG, String.format("updatedPost: [%s]", updatedPost));
+        PostEntity updatedPost = postService.savePost(post);
+        LoggerUtility.t(clazz, String.format("updatedPost: [%s]", updatedPost));
         return PostMapper.toResponse(updatedPost, commentService.getComments(postId, 0), authUser.getId());
     }
 }

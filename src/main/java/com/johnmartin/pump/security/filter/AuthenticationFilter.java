@@ -1,4 +1,4 @@
-package com.johnmartin.pump.security;
+package com.johnmartin.pump.security.filter;
 
 import java.io.IOException;
 
@@ -54,12 +54,12 @@ public class AuthenticationFilter implements Filter {
                                                           ApiErrorMessages.User.USER_IS_NOT_AUTHENTICATED);
 
             httpResponse.getWriter().write(objectMapper.writeValueAsString(Result.failure(error)));
-
             return;
         }
 
         try {
-            AuthUser user = authService.validate(authHeader);
+            String requestId = (String) request.getAttribute(SecurityConstants.REQUEST_ID);
+            AuthUser user = authService.validate(authHeader, requestId);
             httpRequest.setAttribute(SecurityConstants.AUTH_USER, user);
             chain.doFilter(request, response);
         } catch (Exception e) {
