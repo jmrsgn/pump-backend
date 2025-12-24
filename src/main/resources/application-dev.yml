@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+auth:
+  service:
+    url: http://localhost:8081
+
+logging:
+  level:
+    com.johnmartin.pump: DEBUG
