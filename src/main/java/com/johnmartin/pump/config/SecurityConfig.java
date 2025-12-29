@@ -7,21 +7,29 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.johnmartin.pump.constants.api.ApiConstants;
+import com.johnmartin.pump.security.filter.AuthContextFilter;
 import com.johnmartin.pump.security.filter.CorrelationIdFilter;
 import com.johnmartin.pump.security.filter.RequestLoggingFilter;
+import com.johnmartin.pump.service.AuthService;
 
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public CorrelationIdFilter correlationIdFilter() {
-        return new CorrelationIdFilter();
+    public CorrelationIdFilter correlationIdFilter(ObjectMapper objectMapper) {
+        return new CorrelationIdFilter(objectMapper);
     }
 
     @Bean
     public RequestLoggingFilter requestLoggingFilter() {
         return new RequestLoggingFilter();
+    }
+
+    @Bean
+    public AuthContextFilter authContextFilter(AuthService authService, ObjectMapper objectMapper) {
+        return new AuthContextFilter(authService, objectMapper);
     }
 
     /**
@@ -34,11 +42,16 @@ public class SecurityConfig {
      *             Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   AuthContextFilter authContextFilter,
+                                                   CorrelationIdFilter correlationIdFilter,
+                                                   RequestLoggingFilter requestLoggingFilter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .addFilterBefore(correlationIdFilter(), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(requestLoggingFilter(), CorrelationIdFilter.class)
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.HEALTH)
+            .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(authContextFilter, CorrelationIdFilter.class)
+            .addFilterAfter(requestLoggingFilter, AuthContextFilter.class)
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.HEALTH,
+                                                                          ApiConstants.Path.HEALTH + "/**")
                                                          .permitAll()
                                                          .anyRequest()
                                                          .permitAll());

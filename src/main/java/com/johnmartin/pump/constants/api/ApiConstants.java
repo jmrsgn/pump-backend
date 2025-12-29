@@ -5,10 +5,12 @@ public class ApiConstants {
     private ApiConstants() {
     }
 
+    public static final int RETRIES_COUNT = 5;
+
     public static final String API_BASE_V1 = "/api/v1";
 
     public static class Path {
-        public static final String HEALTH = "/health";
+        public static final String HEALTH = "/actuator/health";
 
         // User
         public static final String API_USER = API_BASE_V1 + "/user";

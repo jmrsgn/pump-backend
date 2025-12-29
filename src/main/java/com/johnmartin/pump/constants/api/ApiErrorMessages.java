@@ -7,9 +7,11 @@ public class ApiErrorMessages {
 
     public static final String INTERNAL_SERVER_ERROR = "Internal server error";
     public static final String INVALID_REQUEST = "Invalid request";
+    public static final String MISSING_AUTH_HEADER = "Missing Authentication Header";
 
     public static class User {
         public static final String USER_IS_NOT_AUTHENTICATED = "User is not authenticated";
+        public static final String USER_NOT_FOUND = "User not found";
         public static final String INVALID_TOKEN = "Invalid token";
         public static final String EMAIL_IS_REQUIRED = "Email is required";
         public static final String PASSWORD_IS_REQUIRED = "Password is required";

@@ -20,6 +20,7 @@ import com.johnmartin.pump.exception.ResourceNotFoundException;
 import com.johnmartin.pump.exception.UnauthorizedException;
 import com.johnmartin.pump.mapper.CommentMapper;
 import com.johnmartin.pump.repository.CommentRepository;
+import com.johnmartin.pump.security.AuthContext;
 import com.johnmartin.pump.utilities.LoggerUtility;
 
 import jakarta.transaction.Transactional;
@@ -52,16 +53,14 @@ public class CommentService {
 
     /**
      * Create a comment
-     * 
-     * @param authUser
-     *            - Authenticated user
+     *
      * @param postId
      *            - Post ID
      * @param request
      *            - CreateCommentRequest
      * @return CommentResponse
      */
-    public CommentResponse createComment(AuthUser authUser, String postId, CreateCommentRequest request) {
+    public CommentResponse createComment(String postId, CreateCommentRequest request) {
         LoggerUtility.d(clazz,
                         String.format("Execute method: [createComment] postId: [%s] request: [%s]", postId, request));
 
@@ -69,6 +68,7 @@ public class CommentService {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
         }
 
+        AuthUser authUser = AuthContext.get();
         PostEntity post = postService.getPostById(postId);
 
         CommentEntity createdComment = new CommentEntity();
@@ -89,12 +89,10 @@ public class CommentService {
     /**
      * Delete a comment
      *
-     * @param authUser
-     *            - Authenticated user
      * @param commentId
      *            - Comment ID
      */
-    public void deleteComment(AuthUser authUser, String postId, String commentId) {
+    public void deleteComment(String postId, String commentId) {
         LoggerUtility.d(clazz,
                         String.format("Execute method: [deleteComment] postId: [%s] commentId: [%s]",
                                       postId,
@@ -108,6 +106,7 @@ public class CommentService {
             throw new BadRequestException(ApiErrorMessages.Comment.COMMENT_ID_IS_REQUIRED);
         }
 
+        AuthUser authUser = AuthContext.get();
         PostEntity post = postService.getPostById(postId);
         CommentEntity comment = getCommentById(commentId);
 
@@ -145,8 +144,6 @@ public class CommentService {
     /**
      * Like a comment
      *
-     * @param authUser
-     *            - Authenticated user
      * @param postId
      *            - Post ID
      *
@@ -154,7 +151,7 @@ public class CommentService {
      *            - Comment ID
      * @return CommentResponse
      */
-    public CommentResponse likeComment(AuthUser authUser, String postId, String commentId) {
+    public CommentResponse likeComment(String postId, String commentId) {
         LoggerUtility.d(clazz,
                         String.format("Execute method: [likeComment] postId: [%s] commentId: [%s]", postId, commentId));
 
@@ -166,14 +163,14 @@ public class CommentService {
             throw new BadRequestException(ApiErrorMessages.Comment.COMMENT_ID_IS_REQUIRED);
         }
 
-        PostEntity post = postService.getPostById(postId);
+        AuthUser authUser = AuthContext.get();
         CommentEntity comment = getCommentById(commentId);
 
         // If user already liked the comment, unlike
         if (CollectionUtils.containsAny(comment.getLikedByUserIds(), authUser.getId())) {
-            unlikeComment(authUser.getId(), comment.getId());
+            applyUnlikeComment(authUser.getId(), comment.getId());
         } else {
-            likeComment(authUser.getId(), comment.getId());
+            applyLikeComment(authUser.getId(), comment.getId());
         }
 
         // Get updated post to get updated like state
@@ -213,7 +210,7 @@ public class CommentService {
      * @param commentId
      *            - Comment ID
      */
-    public void likeComment(String userId, String commentId) {
+    public void applyLikeComment(String userId, String commentId) {
         commentRepository.likeComment(userId, commentId);
     }
 
@@ -225,7 +222,7 @@ public class CommentService {
      * @param commentId
      *            - Comment ID
      */
-    public void unlikeComment(String userId, String commentId) {
+    public void applyUnlikeComment(String userId, String commentId) {
         commentRepository.unlikeComment(userId, commentId);
     }
 }

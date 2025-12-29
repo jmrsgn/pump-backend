@@ -17,6 +17,7 @@ import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.ResourceNotFoundException;
 import com.johnmartin.pump.mapper.PostMapper;
 import com.johnmartin.pump.repository.PostRepository;
+import com.johnmartin.pump.security.AuthContext;
 import com.johnmartin.pump.utilities.LoggerUtility;
 
 @Service
@@ -30,14 +31,14 @@ public class PostService {
     /**
      * Create a post
      *
-     * @param authUser
-     *            - Authenticated user
      * @param request
      *            - CreatePostRequest
      * @return PostResponse
      */
-    public PostResponse createPost(AuthUser authUser, CreatePostRequest request) {
+    public PostResponse createPost(CreatePostRequest request) {
         LoggerUtility.d(clazz, String.format("Execute method: [createPost] request: [%s]", request));
+
+        AuthUser authUser = AuthContext.get();
 
         if (request == null) {
             throw new BadRequestException(ApiErrorMessages.INVALID_REQUEST);

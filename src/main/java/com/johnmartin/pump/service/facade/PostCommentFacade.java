@@ -20,6 +20,7 @@ import com.johnmartin.pump.entities.PostEntity;
 import com.johnmartin.pump.exception.BadRequestException;
 import com.johnmartin.pump.exception.UnauthorizedException;
 import com.johnmartin.pump.mapper.PostMapper;
+import com.johnmartin.pump.security.AuthContext;
 import com.johnmartin.pump.service.CommentService;
 import com.johnmartin.pump.service.PostService;
 import com.johnmartin.pump.utilities.LoggerUtility;
@@ -39,15 +40,15 @@ public class PostCommentFacade {
 
     /**
      * Get posts with 10 latest comments
-     * 
-     * @param authUser
-     *            - Authenticated user
+     *
      * @param page
      *            - page
      * @return List of PostResponse
      */
-    public List<PostResponse> getPostsWithLatestComments(AuthUser authUser, int page) {
+    public List<PostResponse> getPostsWithLatestComments(int page) {
         LoggerUtility.d(clazz, String.format("Execute method: [getPostsWithLatestComments], page: [%d]", page));
+
+        AuthUser authUser = AuthContext.get();
 
         PageRequest pageRequest = PageRequest.of(page, UIConstants.MINIMUM_POSTS);
         Page<PostEntity> postPage = postService.getPostsWithLatestComments(pageRequest);
@@ -66,14 +67,14 @@ public class PostCommentFacade {
     /**
      * Get post info
      * 
-     * @param authUser
-     *            - Authenticated user
      * @param postId
      *            - Post ID
      * @return PostResponse
      */
-    public PostResponse getPostInfo(AuthUser authUser, String postId) {
+    public PostResponse getPostInfo(String postId) {
         LoggerUtility.d(clazz, String.format("Execute method: [getPostInfo] postId: [%s]", postId));
+
+        AuthUser authUser = AuthContext.get();
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
@@ -88,15 +89,15 @@ public class PostCommentFacade {
 
     /**
      * Like a post
-     * 
-     * @param authUser
-     *            - Authenticated user
+     *
      * @param postId
      *            - Post ID
      * @return PostResponse
      */
-    public PostResponse likePost(AuthUser authUser, String postId) {
+    public PostResponse likePost(String postId) {
         LoggerUtility.d(clazz, String.format("Execute method: [likePost] postId: [%s]", postId));
+
+        AuthUser authUser = AuthContext.get();
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
@@ -121,15 +122,15 @@ public class PostCommentFacade {
 
     /**
      * Delete a post
-     * 
-     * @param authUser
-     *            - Authenticated user
+     *
      * @param postId
      *            - Post ID
      */
     @Transactional
-    public void deletePost(AuthUser authUser, String postId) {
+    public void deletePost(String postId) {
         LoggerUtility.d(clazz, String.format("Execute method: [deletePost] postId: [%s]", postId));
+
+        AuthUser authUser = AuthContext.get();
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
@@ -149,10 +150,21 @@ public class PostCommentFacade {
         postService.deletePost(post.getId());
     }
 
+    /**
+     * Update a post
+     * 
+     * @param postId
+     *            - Post ID
+     * @param request
+     *            - UpdatePostRequest
+     * @return PostResponse
+     */
     @Transactional
-    public PostResponse updatePost(AuthUser authUser, String postId, UpdatePostRequest request) {
+    public PostResponse updatePost(String postId, UpdatePostRequest request) {
         LoggerUtility.d(clazz,
                         String.format("Execute method: [updatePost] postId: [%s] request: [%s]", postId, request));
+
+        AuthUser authUser = AuthContext.get();
 
         if (StringUtils.isBlank(postId)) {
             throw new BadRequestException(ApiErrorMessages.Post.POST_ID_IS_REQUIRED);
