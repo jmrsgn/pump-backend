@@ -38,6 +38,6 @@ public class AuthenticationFilter extends BaseFilter {
 
     @Override
     protected boolean shouldSkip(HttpServletRequest request) {
-        return request.getRequestURI().startsWith(ApiConstants.Path.HEALTH);
+        return request.getRequestURI().startsWith(ApiConstants.Path.ACTUATOR);
     }
 }

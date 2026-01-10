@@ -50,11 +50,15 @@ public class SecurityConfig {
             .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(authContextFilter, CorrelationIdFilter.class)
             .addFilterAfter(requestLoggingFilter, AuthContextFilter.class)
-            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.HEALTH,
-                                                                          ApiConstants.Path.HEALTH + "/**")
+            .authorizeHttpRequests(authorize -> authorize.requestMatchers(ApiConstants.Path.ACTUATOR
+                                                                          + ApiConstants.Path.HEALTH,
+                                                                          ApiConstants.Path.ACTUATOR + ApiConstants.Path.HEALTH
+                                                                                                      + "/**")
                                                          .permitAll()
+                                                         .requestMatchers(ApiConstants.Path.ACTUATOR + "/**")
+                                                         .denyAll()
                                                          .anyRequest()
-                                                         .permitAll());
+                                                         .authenticated());
         return http.build();
     }
 }
